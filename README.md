@@ -42,26 +42,33 @@ Dataset/Input to the seq2seq: completeGraph (every combo) between all the `good_
 ## Structure of Respository
 ```
 
-### _accessories
+---
+
+## File Structure
+
+### `the_glue.py`
+This is what calls on all the modules and runs the entire pipeline, end-to-end.
+
+### `_accessories`
 This are any helper functions that will be shared across any of the Modules.
 
-### Modules
+### `Modules`
 Note: every module has `Extracontent` which is code you're no longer using, but might be important for reference and `_accessories` which are helper functions for your stage process.
 
-#### Stage 1 – Data Ingestion
+#### Stage 1 – `DataIngestion`
 Hits the `CodeBERT` or `alternative` API.
 This ingests the remote dataset and spits out format:
 `[code_id1, code_id2, ...]` with reference dictionary `{code_id: (documentation, actual_code, reputation_score)}`.
 
-#### Stage 2 – Intent Clustering
+#### Stage 2 – `IntentClustering`
 Done via supervised KMeans or unsupervised self-organizing map.
 This takes all the code, and spits out format `{code_id: intent_category}` for all `code_id`s.
 
-#### Stage 3 – Code2Code
+#### Stage 3 – `Code2Code`
 This is our seq2seq model (RNN –> ... -> Transformer) that:
 1. Generates the dataset for the seq2seq
 2. Trains the seq2seq model
 
-#### Stage 4 – Code2Explanation
+#### Stage 4 – `Code2Explanation`
 This is able to ingest a given code snippet and output exemplar code snippets and explanations.
 Hits the `Codex` API.
