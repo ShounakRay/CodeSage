@@ -1,4 +1,5 @@
-# AutoFeedback-on-code
+# CodeSage
+Often times, there is often a more preferable and efficient implementation of the code a developer has written for their project. It is only through code reviews and extensive research that one is able to enhance their code quality, both from a functionality and style perspective. It is especially and relatively a less fluid and time-consuming process for fledgling coders to gain inspiration from the relevant and exemplary repositories online. Thus, the overarching problem we wish to address is the following: how can we provide developers with "better" alternative code snippets with respect to what they’re writing and explain why the alternative is better? Answering this question involves computationally searching numerous code samples online, implicitly representing the relationships between sub-optimal and "optimal" code, and autonomously reasoning to the user why one approach is better than the other
 
 ## TODO:
 [Link Google Doc here]
