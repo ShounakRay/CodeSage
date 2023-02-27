@@ -23,7 +23,6 @@ Dataset/Input to the seq2seq: completeGraph (every combo) between all the `good_
                                 for a given intent_category
 
 """
-```
 
 # Joe:
 # TODO: Update documentation that we use
@@ -41,11 +40,14 @@ Dataset/Input to the seq2seq: completeGraph (every combo) between all the `good_
 #       sanity-check which one is better
 
 ## Structure of Respository
+```
 
 ### _accessories
 This are any helper functions that will be shared across any of the Modules.
 
 ### Modules
+Note: every module has `Extracontent` which is code you're no longer using, but might be important for reference and `_accessories` which are helper functions for your stage process.
+
 #### Stage 1 – Data Ingestion
 Hits the `CodeBERT` or `alternative` API.
 This ingests the remote dataset and spits out format:
