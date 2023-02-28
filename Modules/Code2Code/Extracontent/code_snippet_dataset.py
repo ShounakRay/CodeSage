@@ -76,9 +76,14 @@ class CodeSnippetDataset:
         
 # Example Usage
 if __name__ == "__main__":
-    ds = CodeSnippetDataset(languages=["Python"])
-    snippets = ds.get_n_snippets(4)
-    print(snippets[0])
-    snippets = ds.get_n_snippets(4)
-    print(snippets[0]) # will NOT be the same as in previous invocation
-    print("\n".join(snippets[0]["functions"]))
+    # ds = CodeSnippetDataset(languages=["Python"])
+    # snippets = ds.get_n_snippets(4)
+    # print(snippets[0])
+    # snippets = ds.get_n_snippets(4)
+    # print(snippets[0]) # will NOT be the same as in previous invocation
+    # print("\n".join(snippets[0]["functions"]))
+    owner = "Azure"
+    repo = "azure-sdk-for-python"
+    repo_response = requests.get(f"https://api.github.com/repos/{owner}/{repo}")
+    content = json.loads(repo_response.text)
+    print(content)
