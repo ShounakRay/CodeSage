@@ -5,6 +5,7 @@
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
+import json
 
 """
 Format that Shounak needs (Joe sends this to him):
@@ -40,10 +41,24 @@ Dataset/Input to the seq2seq: completeGraph (every combo) between all the `good_
 # TODO: Building out KMeans supervised clustering and comparing it to SOM unsupervised,
 #       sanity-check which one is better
 
-def tfidf_vectorizer(raw_documents, input='content', **kwargs):
+def vectorize(data, mode='pretrained', input='content', **kwargs):
+    assert mode in ("tfidf", "pretrained")
+    if mode == "tfidf":
+        return _tfidf_vectorizer(raw_documents=data,
+                                input='content', max_features=None,
+                                use_idf=True, smooth_idf=True, sublinear_tf=True)
+    elif mode == 'pretrained':
+        from sentence_transformers import SentenceTransformer
+        model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+        embeddings = model.encode(data)
+        return embeddings
+    else:
+        raise ValueError("We don't support this vectorizer mode yet.")
+
+def _tfidf_vectorizer(raw_documents, input='content', **kwargs):
     """
     USAGE of TF-IDF – Bag of Words Vectorizer + Transformer:
-    tfidf_vectorizer(raw_documents, input='content', max_features = None, use_idf = True, smooth_idf = True, sublinear_tf = True)
+    _tfidf_vectorizer(raw_documents, input='content', max_features = None, use_idf = True, smooth_idf = True, sublinear_tf = True)
         > returns numpy array.
     """
     # Verify structure of raw_documents
@@ -67,10 +82,20 @@ def tfidf_vectorizer(raw_documents, input='content', **kwargs):
     return vectorizer.fit_transform(raw_documents=raw_documents).toarray()
 
 
-def _get_data(_CATS=['alt.atheism', 'soc.religion.christian', 'comp.graphics', 'sci.med']):
-    from sklearn.datasets import fetch_20newsgroups
-    return fetch_20newsgroups(subset='train', categories=_CATS, shuffle=True, random_state=42).data
+def _get_data(source='json', _CATS=['alt.atheism', 'soc.religion.christian', 'comp.graphics', 'sci.med']):
+    assert source in ("json", "newsgroups")
+    if source == "newsgroups":
+        from sklearn.datasets import fetch_20newsgroups
+        data = fetch_20newsgroups(subset='train', categories=_CATS, shuffle=True, random_state=42).data
+    elif source == "json":
+        with open("_tempData/functions.json", "r") as f:
+            data = [metaData["documentation"] for metaData in list(json.load(f)["code_reference"].values())]
+    else:
+        raise ValueError("Source not supported")
+    return data
 
+if __name__ == "__main__":
+    print(_get_data("json"))
 
 # def _test():
 #     _CATS = ['alt.atheism', 'soc.religion.christian', 'comp.graphics', 'sci.med']
