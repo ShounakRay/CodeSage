@@ -3,7 +3,7 @@ from Modules.Code2Code.Extracontent.code_snippet_dataset import CodeSnippetDatas
 from Modules.IntentClustering.data2clusters import IntentClustering
 from Modules.ScoreClusters.clusters2score import ScoreClusters
 
-N_SNIPPETS = 10;
+N_SNIPPETS = 100;
 
 # Get Dataset
 dataset = CodeSnippetDataset(languages=["Python"])
@@ -23,4 +23,3 @@ scored_dataset = clusters2scoredDataset.get_scored_dataset()
 
 # Train with Seq2Seq model
 
-print(clusters)
