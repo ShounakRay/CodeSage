@@ -3,6 +3,9 @@
 # @Last modified by:   shounak.ray
 # @Last modified time: 2022-06-30T11:50:00-07:00
 
+import sys
+print(sys.version_info)
+
 import matplotlib.pyplot as plt
 import math
 import numpy as np
@@ -21,7 +24,7 @@ import matplotlib.animation as animation
 import imageio.v2 as imageio
 import glob
 import os
-from vectorizer import _get_data, tfidf_vectorizer
+from vectorizer import _get_data, vectorize
 
 
 def _soft_sanitation(variable, msg='Cannot complete operation; requires previous step.'):
@@ -117,7 +120,8 @@ class SOM:
         coordinates = list(nx.get_node_attributes(self.neuronal_data, 'weight_vector').values())
         model2d = MDS(n_components=2, metric=True,
                       n_init=4, max_iter=300, verbose=0, eps=0.001,
-                      n_jobs=-1, random_state=42, dissimilarity='euclidean')
+                      n_jobs=-1, random_state=42, dissimilarity='euclidean',
+                      normalized_stress='auto')
         X_trans = model2d.fit_transform(coordinates)
         # plt.figure(figsize=(8, 8))
         _ = plt.figure(figsize=(10, 10))
@@ -128,7 +132,7 @@ class SOM:
             plt.savefig(kwargs.get('fname', f'pictures/neurons-{self.curr_epoch}.jpeg'))
             plt.close()
 
-    def fit(self, data, animate=True, animate_method='mds_neurons', anim_every_n_epochs=10, **kwargs):
+    def fit(self, data, animate=True, animate_method='mds_neurons', anim_every_n_epochs=250, **kwargs):
         print('> Fitting map...')
         if len(data[0]) != self.num_features:
             print("FATAL: The number of features detected in the data doesn't match what was entered during map creation. Redo map creation.")
@@ -183,8 +187,20 @@ class SOM:
             img_paths = [f'pictures/neurons-{n}.jpeg' for n in nums]
             if len(img_paths) == 0:
                 raise ValueError('Didn\'t find any paths inside "\\picture" folder.')
-            ims = [imageio.imread(f) for f in img_paths]
-            imageio.mimwrite(f'animated_file-{str(datetime.now())}.mp4', ims, fps=60)
+            
+            # ims = [imageio.imread(f) for f in img_paths]
+            # imageio.mimwrite(f'animated_file-{str(datetime.now())}.mp4', ims, fps=60)
+
+            # Create an Imageio writer object for the MP4 file
+            writer = imageio.get_writer(f'animated_file-{str(datetime.now())}.mp4', fps=60)
+
+            # Loop through each JPEG image and add it to the writer object
+            for image_file in img_paths:
+                image = imageio.imread(image_file)
+                writer.append_data(image)
+            # Close the writer object to finalize the MP4 file
+            writer.close()
+
             plt.close()
             print('> Finished.')
 
@@ -235,17 +251,16 @@ class SOM:
 # data = _normalize(data)
 # # _ = plt.scatter(*zip(*data))
 """ VECTORIZED TEXT DATA – 4 Categories """
-data = tfidf_vectorizer(_get_data(_CATS=None),
-                        input='content', max_features=None, use_idf=True, smooth_idf=True, sublinear_tf=True)
-data = _normalize(data)
-
+data = vectorize(_get_data(source='json'), mode='pretrained')
+print("Input Data:\n", data, "\n\n")
+# data = _normalize(data)
 
 def run_model():
     # Class/categorical balance is important!
     neurons = 5 * np.sqrt(len(data)) / 2
-    learning_rate = 0.2
-    epochs = 500000   # Can be determined by likelihood that every sample is seen in the data. (or change algo accordingly)
-    sigma_0 = 100     # Should be some function of num_features. Pull harder if there's a lot of complexity.
+    learning_rate = 0.4
+    epochs = 50000       # Can be determined by likelihood that every sample is seen in the data. (or change algo accordingly)
+    sigma_0 = 100       # Should be some function of num_features. Pull harder if there's a lot of complexity.
     convergence_threshold = 1e-4
     # You want to observe the progression of a pattern slowly
     # TODO: Add Threading
@@ -254,10 +269,9 @@ def run_model():
     S = SOM(neurons=neurons, learning_rate=learning_rate, epochs=epochs, sigma_0=sigma_0, convergence_threshold=convergence_threshold, neuron_dim=2)
     S.create_feature_map(len(data[0]))
     # grid_neurons vs mds_neurons
-    S.fit(data, animate=True,
-          animate_method='mds_neurons', anim_every_n_epochs=5000, only_draw_nodes=False)
-    S._plot_neuronal_mds(fname='final_neuronal_mds.jpeg', save=True)
-    S._plot_neuronal_grid(fname='final_neuronal_grid.jpeg', save=True)
+    S.fit(data, animate=True, animate_method='mds_neurons', anim_every_n_epochs=10, only_draw_nodes=False)
+    # S._plot_neuronal_mds(fname='json_neuronal_mds.jpeg', save=True)
+    S._plot_neuronal_grid(fname='json_neuronal_grid.jpeg', save=True)
 
 
 # nx.draw(S.neuronal_data, pos=nx.get_node_attributes(S.neuronal_data, 'position'))
