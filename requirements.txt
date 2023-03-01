@@ -63,3 +63,6 @@ wcwidth==0.2.6
 xxhash==3.2.0
 yarl==1.8.2
 zipp==3.14.0
+sentencepiece==0.1.97 
+scikit-learn==1.2.1 
+sentence_transformers==2.2.2
