@@ -1,4 +1,4 @@
-from base_model import BaseCode2CodeModel
+from Modules.Code2Code.models.base_model import BaseCode2CodeModel
 from datasets import Dataset
 from transformers import RobertaTokenizer, pipeline, T5ForConditionalGeneration, Seq2SeqTrainingArguments, Seq2SeqTrainer, DataCollatorForSeq2Seq
 import evaluate
@@ -20,11 +20,11 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         super().__init__()
         self.pretrained_model_name += model_size
         self.metric = evaluate.load('sacrebleu')
-        self.pretrained_model = T5ForConditionalGeneration.from_pretrained(self.metric)
+        self.pretrained_model = T5ForConditionalGeneration.from_pretrained(self.pretrained_model_name)
         self.max_length = max_length
         self.truncation = truncation
-        self.tokenizer = RobertaTokenizer.from_pretrained(self.model_name)
-        self.finetuned_model_name = self.model_name
+        self.tokenizer = RobertaTokenizer.from_pretrained(self.pretrained_model_name)
+        self.finetuned_model_name = self.pretrained_model_name
     
     def preprocess_function(self, examples: Dataset):
         inputs = [self.prefix + example for example in examples["input"]]

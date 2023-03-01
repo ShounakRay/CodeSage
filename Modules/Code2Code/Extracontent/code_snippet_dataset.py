@@ -46,7 +46,7 @@ class CodeSnippetDataset:
         return functions
      
     def augment_code_entry(self, entry):
-        entry["reputation_features"] = []
+        entry["reputation_features"] = self.construct_feature_set(entry)
         entry["functions"] = self.construct_list_of_functions(entry)
         return entry
         

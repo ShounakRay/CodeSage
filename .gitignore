@@ -4,12 +4,14 @@
 # Our internal git-ignores here
 
 # Michael
-
+*.json
+*.csv
 # Joe
 
 # Shounak
 Modules/IntentClustering/Visualizations/
 Modules/IntentClustering/pictures
+Modules/IntentClustering/_tempData/
 
 ################################################################################
 ################################################################################

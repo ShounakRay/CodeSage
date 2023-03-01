@@ -1,6 +1,6 @@
 from sklearn.cluster import KMeans
 import numpy as np
-from vectorizer import _get_data, vectorize
+from Modules.IntentClustering.vectorizer import _get_data, vectorize
 import json
 
 class IntentClustering():
@@ -12,15 +12,16 @@ class IntentClustering():
       with open('clusters.json', 'w') as fp:
         json.dump(data, fp)
 
-    def get_clusters(self):
+    def get_clusters(self, n_clusters: int):
       doc_to_id = {}
-      for metaData in self.code_reference:
+      for metaData in list(self.code_reference.items()):
           code_id, info = metaData
           doc_to_id[info["documentation"]] = code_id
 
-      data = _get_data(source = "json")
+      # data = _get_data(source = "json")
+      data = [metaData["documentation"] for metaData in list(self.code_reference.values())]
       v_data = vectorize(data=data, mode="pretrained")
-      kmeans = KMeans(n_clusters=5, random_state=41, n_init="auto").fit(v_data)
+      kmeans = KMeans(n_clusters=n_clusters, random_state=41, n_init="auto").fit(v_data)
 
       clusters = {}
       for i in range(len(kmeans.labels_)):
