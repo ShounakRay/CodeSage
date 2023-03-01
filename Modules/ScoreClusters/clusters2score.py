@@ -15,7 +15,7 @@ class ScoreClusters():
   def write_to_file(self, df):
      df.to_csv("scored_dataset.csv")
 
-  def get_scored_dataset(self):
+  def get_scored_dataset(self) -> tuple[Dataset, Dataset]:
     inputs = []
     outputs = []
 
@@ -46,7 +46,6 @@ class ScoreClusters():
     self.write_to_file(df)
 
     hf_ds = Dataset.from_pandas(df)
-
     return hf_ds
 
 

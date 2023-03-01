@@ -2,6 +2,7 @@ from Modules.Code2Explanation.code2doc import Code2DocModule
 from Modules.Code2Code.Extracontent.code_snippet_dataset import CodeSnippetDataset
 from Modules.IntentClustering.data2clusters import IntentClustering
 from Modules.ScoreClusters.clusters2score import ScoreClusters
+from Modules.Code2Code.models.t5_code_2_code_model import T5Code2CodeModel
 
 N_SNIPPETS = 100;
 
@@ -22,4 +23,10 @@ clusters2scoredDataset = ScoreClusters(clusters, data_with_docs['code_reference'
 scored_dataset = clusters2scoredDataset.get_scored_dataset()
 
 # Train with Seq2Seq model
+model = T5Code2CodeModel("base")
+model.train(scored_dataset, "glued_code_to_code_model")
 
+# Perform inference
+example_bad_function = "def hello_world(): pfds('hello_world')"
+resulting_good_function = model(example_bad_function)["translation_text"]
+print(resulting_good_function)
