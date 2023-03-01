@@ -22,5 +22,5 @@ for i in range(len(kmeans.labels_)):
     else:
         new_dict[cluster_id].append(data_app)
 
-with open('/_tempData/kmeans_result.json', 'w') as fp:
+with open('_tempData/kmeans_result.json', 'w') as fp:
     json.dump(new_dict, fp)
