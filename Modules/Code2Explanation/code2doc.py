@@ -17,7 +17,6 @@ class Code2DocModule():
     def write_to_file(self, data):
       with open("output.json", "w") as f:
         json.dump(data, f)
-
     def get_docs(self):
       code_reference = {}
       function_ids = []
@@ -26,7 +25,7 @@ class Code2DocModule():
       for snippet in self.snippets:
         for i, func in enumerate(snippet['functions']):
           id = snippet['repo_name']+"_"+snippet['path']+"_"+str(i)
-          
+
           function_ids.append(id)
           code_reference[id] = {
               "code": func,

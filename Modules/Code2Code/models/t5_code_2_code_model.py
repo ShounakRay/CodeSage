@@ -94,6 +94,10 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         
         trainer.train()
         self.finetuned_model_name = output_model_dir
+        try:
+            self.pretrained_model.push_to_hub(self.finetuned_model_name)
+        except:
+            print("Error pushing automatically to hub. Push manually via Python REPL.")
     
     def __call__(self, input_bad_code: str) -> list[dict[str:str]]:
         text = self.prefix + input_bad_code
