@@ -63,7 +63,7 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         weight_decay=0.01,
         num_train_epochs=2,
     ):
-        dataset = dataset.map(self.preprocess_function).train_test_split(test_size=test_size)
+        dataset = dataset.map(self.preprocess_function, batched=True, num_proc=4).train_test_split(test_size=test_size)
         train_dataset = dataset["train"]
         eval_dataset = dataset["test"]
         data_collator = DataCollatorForSeq2Seq(tokenizer=self.tokenizer, model=self.pretrained_model)
