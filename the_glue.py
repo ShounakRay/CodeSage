@@ -65,7 +65,7 @@ print("Got documentations!\n")
 doc2clusters = IntentClustering(function_ids=data_with_docs['function_ids'], code_reference=data_with_docs['code_reference'],
                                 IC_ALGO=IC_ALGO,
                                 IC_KVAL=IC_KVAL)
-clusters = doc2clusters.get_clusters(n_clusters=5)
+clusters = doc2clusters.get_clusters()
 print("Got clusters!\n")
 
 # Score clusters

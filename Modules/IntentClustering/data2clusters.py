@@ -4,15 +4,17 @@ from Modules.IntentClustering.vectorizer import _get_data, vectorize
 import json
 
 class IntentClustering():
-    def __init__(self, function_ids, code_reference):
+    def __init__(self, function_ids, code_reference, IC_ALGO, IC_KVAL):
       self.function_ids = function_ids
       self.code_reference = code_reference
+      self.IC_ALGO = IC_ALGO
+      self.IC_KVAL = IC_KVAL
 
     def write_to_file(self, data):
       with open('clusters.json', 'w') as fp:
         json.dump(data, fp)
 
-    def get_clusters(self, n_clusters: int):
+    def kmeans(self, n_clusters):
       doc_to_id = {}
       for metaData in list(self.code_reference.items()):
           code_id, info = metaData
@@ -35,3 +37,24 @@ class IntentClustering():
       self.write_to_file(clusters)
       
       return clusters
+
+    def dbscan(self):
+       return NotImplementedError
+    
+    def saveSOM(self):
+       return NotImplementedError
+
+    def get_clusters(self):
+      if self.IC_ALGO == "KMEANS":
+         return self.kmeans(n_clusters=self.IC_KVAL)
+      elif self.IC_ALGO == "KMEANS/SOM":
+         # Save SOM
+         self.saveSOM()
+         SOM_NUMCLUSTERS = self.IC_KVAL
+         return self.kmeans(n_clusters=SOM_NUMCLUSTERS)
+      elif self.IC_ALGO == "DBSCSAN":
+         return self.dbscan()
+      else:
+         raise ValueError(f"Clustering algorithm {self.IC_ALGO} not applicable.")
+
+# EOF
