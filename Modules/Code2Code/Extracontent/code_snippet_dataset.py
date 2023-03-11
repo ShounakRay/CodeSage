@@ -7,8 +7,8 @@ import time
 import json
 from datetime import datetime
 
-DATASET_URI = "codeparrot/github-code"
-
+GITHUB_DATASET_URI = "codeparrot/github-code"
+ANNOTATED_DATASET_URI = 'michaelnath/annotated-code-functions-base'
 
 class CodeSnippetDataset:
     def construct_feature_set(self, code_entry) -> dict[str:int]:
@@ -46,8 +46,11 @@ class CodeSnippetDataset:
         return functions
      
     def augment_code_entry(self, entry):
-        entry["reputation_features"] = self.construct_feature_set(entry)
-        entry["functions"] = self.construct_list_of_functions(entry)
+        if self.from_github:
+            entry["reputation_features"] = self.construct_feature_set(entry)
+            entry["functions"] = self.construct_list_of_functions(entry)
+        else: 
+            entry["id"] = hash(entry["function"])
         return entry
         
     def get_n_snippets(self, n: int) -> list[dict]:
@@ -60,19 +63,27 @@ class CodeSnippetDataset:
             list[dict]: an array of size n, where each element is a dictionary containing the functions / 
             reputation features of a code snippet.
         """
-        snippets = self.dataset.take(n).remove_columns("code")
-        self.dataset = self.dataset.skip(n)
-        return list(snippets)        
+        if self.from_github:
+            snippets = self.dataset.take(n).remove_columns("code")
+            self.dataset = self.dataset.skip(n)
+            return list(snippets)     
+        else:
+            snippets = self.dataset[:n]
+            return snippets
 
-    def __init__(self, languages: list[str]) -> None:
+    def __init__(self, languages: list[str], github=False) -> None:
         """__init__
         Args:
             languages (list[str]): programming languages to be included. Must be some of "Python", "Javascript", "Java", etc...
                                    for now only supports Python
         """
         
-        self.dataset : IterableDataset = load_dataset(DATASET_URI, streaming=True, split='train', languages=languages)
-        self.dataset : IterableDataset = self.dataset.map(self.augment_code_entry)
+        self.from_github = github
+        if github:
+            self.dataset : IterableDataset = load_dataset(GITHUB_DATASET_URI, streaming=True, split='train', languages=languages)
+            self.dataset : IterableDataset = self.dataset.map(self.augment_code_entry)
+        else:
+            self.dataset  = load_dataset(ANNOTATED_DATASET_URI, split="train").map(self.augment_code_entry)
         
 # Example Usage
 if __name__ == "__main__":

@@ -3,12 +3,13 @@ from Modules.Code2Code.Extracontent.code_snippet_dataset import CodeSnippetDatas
 from Modules.IntentClustering.data2clusters import IntentClustering
 from Modules.ScoreClusters.clusters2score import ScoreClusters
 from Modules.Code2Code.models.t5_code_2_code_model import T5Code2CodeModel
-N_SNIPPETS = 100;
+N_SNIPPETS = 100
 
 # Get Dataset
-dataset = CodeSnippetDataset(languages=["Python"])
+dataset = CodeSnippetDataset(github=False, languages=["Python"])
 code_snippets = dataset.get_n_snippets(N_SNIPPETS)
 print("Got snippets!")
+
 
 # Get documentation from dataset
 code2doc = Code2DocModule(code_snippets)

@@ -22,18 +22,16 @@ class Code2DocModule():
       function_ids = []
 
       count = 0
-      for snippet in self.snippets:
-        for i, func in enumerate(snippet['functions']):
-          id = snippet['repo_name']+"_"+snippet['path']+"_"+str(i)
-
-          function_ids.append(id)
-          code_reference[id] = {
-              "code": func,
-              "documentation": self.model([func])[0]['summary_text'],
-              "reputation": snippet['reputation_features']
-          }
-          count += 1
-
+      
+      for i, snippet in enumerate(self.snippets["function"]):
+        id = self.snippets["id"][i]
+        function_ids.append(id)
+        code_reference[id] = {
+          "code": snippet,
+          "documentation": self.model([snippet])[0]["summary_text"],
+          "reputation": self.snippets["features"]
+        }
+        count += 1
         print(str(count) + " functions processed.")
       
       print("No. of processed functions: ", len(code_reference.keys()))
