@@ -23,6 +23,10 @@ class Code2DocModule():
 
       count = 0
       
+      documentations = self.mode(self.snippets["function"])
+      print(documentations)
+      
+      
       for i, snippet in enumerate(self.snippets["function"]):
         id = self.snippets["id"][i]
         function_ids.append(id)
