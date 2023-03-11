@@ -32,6 +32,6 @@ class IntentClustering():
         else:
             clusters[cluster_id].append(data_app)
 
-      self.write_to_file(clusters)
+      # self.write_to_file(clusters)
       
       return clusters

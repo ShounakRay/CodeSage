@@ -44,7 +44,7 @@ class ScoreClusters():
         dicty["target"].append(good_code)
 
     df = pd.DataFrame.from_dict(dicty)
-    self.write_to_file(df)
+    # self.write_to_file(df)
 
     hf_ds = Dataset.from_pandas(df)
     return hf_ds

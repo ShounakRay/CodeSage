@@ -8,8 +8,8 @@ class Code2DocModule():
     
     def train_model(self):
         model = SummarizationPipeline(
-      model=AutoModelWithLMHead.from_pretrained("SEBIS/code_trans_t5_large_code_documentation_generation_python_multitask_finetune"),
-      tokenizer=AutoTokenizer.from_pretrained("SEBIS/code_trans_t5_large_code_documentation_generation_python_multitask_finetune", skip_special_tokens=True),
+      model=AutoModelWithLMHead.from_pretrained("SEBIS/code_trans_t5_base_code_documentation_generation_python_multitask_finetune"),
+      tokenizer=AutoTokenizer.from_pretrained("SEBIS/code_trans_t5_base_code_documentation_generation_python_multitask_finetune", skip_special_tokens=True),
       device=0)
         
         return model
@@ -27,9 +27,11 @@ class Code2DocModule():
           id = snippet['repo_name']+"_"+snippet['path']+"_"+str(i)
 
           function_ids.append(id)
+          documentation = self.model([func])[0]['summary_text']
+
           code_reference[id] = {
               "code": func,
-              "documentation": self.model([func])[0]['summary_text'],
+              "documentation": documentation,
               "reputation": snippet['reputation_features']
           }
           count += 1
@@ -43,6 +45,6 @@ class Code2DocModule():
          "code_reference": code_reference
       }
 
-      self.write_to_file(data)
+      # self.write_to_file(data)
       
       return data
