@@ -10,8 +10,7 @@ class Code2DocModule():
     def train_model(self):
         model = SummarizationPipeline(
       model=AutoModelWithLMHead.from_pretrained("SEBIS/code_trans_t5_large_code_documentation_generation_python_multitask_finetune"),
-      tokenizer=AutoTokenizer.from_pretrained("SEBIS/code_trans_t5_large_code_documentation_generation_python_multitask_finetune", skip_special_tokens=True),
-      device=0)
+      tokenizer=AutoTokenizer.from_pretrained("SEBIS/code_trans_t5_large_code_documentation_generation_python_multitask_finetune", skip_special_tokens=True))
         
         return model
     
@@ -23,7 +22,7 @@ class Code2DocModule():
       function_ids = []
 
       count = 0
-      batch_size = 128
+      batch_size = 4
       print("Begin processing {} functions!".format(len(self.snippets["function"])))
       for i in range(1, math.ceil(len(self.snippets["function"]) / batch_size)):
         self.model(self.snippets["function"][(i - 1) * batch_size: i * batch_size])

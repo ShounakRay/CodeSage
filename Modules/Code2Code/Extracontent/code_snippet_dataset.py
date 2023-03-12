@@ -1,7 +1,7 @@
 # IMPORTS
 from datasets import load_dataset
 from datasets.iterable_dataset import IterableDataset
-from code2doc import Code2DocModule
+from Modules.Code2Code.Extracontent.code2doc import Code2DocModule
 import requests
 import ciso8601
 import time
