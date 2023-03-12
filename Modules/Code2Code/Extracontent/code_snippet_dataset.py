@@ -56,11 +56,13 @@ class CodeSnippetDataset:
             entry["id"]
         return entry
         
-    def get_n_snippets(self, n: int, max_length: int):
-        """Provides the next n code snippets from the GitHub dataset. 
+    def get_n_snippets(self, n: int, max_length : int = None):
+        """Provides the next n code snippets from the source dataset.
+            If source dataset is not from GitHub, this function will also only return snippets having length at most `max_length`
 
         Args:
             n (int): number of snippets desired
+            max_length (int): the max number of words permitted in 
 
         Returns:
             list[dict]: an array of size n, where each element is a dictionary containing the functions / 
@@ -98,12 +100,6 @@ class CodeSnippetDataset:
         
 # Example Usage
 if __name__ == "__main__":
-    # ds = CodeSnippetDataset(languages=["Python"])
-    # snippets = ds.get_n_snippets(4)
-    # print(snippets[0])
-    # snippets = ds.get_n_snippets(4)
-    # print(snippets[0]) # will NOT be the same as in previous invocation
-    # print("\n".join(snippets[0]["functions"]))
     owner = "Azure"
     repo = "azure-sdk-for-python"
     repo_response = requests.get(f"https://api.github.com/repos/{owner}/{repo}")

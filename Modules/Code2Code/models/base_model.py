@@ -5,7 +5,7 @@ class BaseCode2CodeModel:
     def __init__(self):
         self.prefix = "refine: "
         self.metric = None
-        login()
+        # login()
     
     def postprocess_function(self, preds, labels):
         raise NotImplementedError
