@@ -1,6 +1,7 @@
 # IMPORTS
 from datasets import load_dataset
 from datasets.iterable_dataset import IterableDataset
+from code2doc import Code2DocModule
 import requests
 import ciso8601
 import time
@@ -51,6 +52,7 @@ class CodeSnippetDataset:
             entry["functions"] = self.construct_list_of_functions(entry)
         else: 
             entry["id"] = hash(entry["function"])
+            entry["id"]
         return entry
         
     def get_n_snippets(self, n: int) -> list[dict]:
@@ -71,7 +73,13 @@ class CodeSnippetDataset:
             snippets = self.dataset[:n]
             return snippets
 
-    def __init__(self, languages: list[str], github=False) -> None:
+    def annotate_functions_with_description(self, code_entries):
+        responses = Code2DocModule().model(code_entries["function"])
+        descriptions = [res["summary_text"] for res in responses]
+        code_entries["description"] = descriptions
+        return code_entries
+    
+    def __init__(self, languages: list[str], github=False, add_reps=False, add_docs=False) -> None:
         """__init__
         Args:
             languages (list[str]): programming languages to be included. Must be some of "Python", "Javascript", "Java", etc...
@@ -79,11 +87,13 @@ class CodeSnippetDataset:
         """
         
         self.from_github = github
-        if github:
+        if self.from_github:
             self.dataset : IterableDataset = load_dataset(GITHUB_DATASET_URI, streaming=True, split='train', languages=languages)
             self.dataset : IterableDataset = self.dataset.map(self.augment_code_entry)
         else:
-            self.dataset  = load_dataset(ANNOTATED_DATASET_URI, split="train").map(self.augment_code_entry)
+            self.dataset  = load_dataset(ANNOTATED_DATASET_URI, split="train")
+            if add_docs:
+                self.dataset = self.dataset.map(self.annotate_functions_with_description, batched=True)
         
 # Example Usage
 if __name__ == "__main__":
