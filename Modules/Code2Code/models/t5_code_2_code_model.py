@@ -10,7 +10,8 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         self, 
         model_size: str, 
         max_length=128,     
-        truncation=True, 
+        truncation=True,
+        metric="chrf" 
             ):
         """Init salesforce codet5 model of a given size
 
@@ -19,7 +20,7 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         """
         super().__init__()
         self.pretrained_model_name += model_size
-        self.metric = evaluate.load('sacrebleu')
+        self.metric = evaluate.load('chrf')
         self.pretrained_model = T5ForConditionalGeneration.from_pretrained(self.pretrained_model_name)
         self.max_length = max_length
         self.truncation = truncation

@@ -1,6 +1,9 @@
 from transformers import AutoTokenizer, AutoModelWithLMHead, SummarizationPipeline
 import json
+import torch
 import math
+from random import choice
+from string import ascii_lowercase
 
 class Code2DocModule():
     def __init__(self, snippets):
@@ -10,8 +13,7 @@ class Code2DocModule():
     def train_model(self):
         model = SummarizationPipeline(
       model=AutoModelWithLMHead.from_pretrained("SEBIS/code_trans_t5_large_code_documentation_generation_python_multitask_finetune"),
-      tokenizer=AutoTokenizer.from_pretrained("SEBIS/code_trans_t5_large_code_documentation_generation_python_multitask_finetune", skip_special_tokens=True))
-        
+      tokenizer=AutoTokenizer.from_pretrained("SEBIS/code_trans_t5_large_code_documentation_generation_python_multitask_finetune", skip_special_tokens=True), device=0)
         return model
     
     def write_to_file(self, data):
@@ -22,17 +24,17 @@ class Code2DocModule():
       function_ids = []
 
       count = 0
-      batch_size = 4
+      batch_size = 16
       print("Begin processing {} functions!".format(len(self.snippets["function"])))
-      for i in range(1, math.ceil(len(self.snippets["function"]) / batch_size)):
-        self.model(self.snippets["function"][(i - 1) * batch_size: i * batch_size])
+      documentations = []
+      for i in range(1, math.ceil(len(self.snippets["function"]) / batch_size) + 1):
+        with torch.no_grad():
+          responses = self.model(self.snippets["function"][(i - 1) * batch_size: i * batch_size])
+        # responses = self.model(self.snippets["function"][(i - 1) * batch_size: i * batch_size])
+        documentations += [response["summary_text"] for response in responses]
         print(f"Batch {i} done!")
-      # responses = self.model(self.snippets["function"])
-      
-      batch_size
-      documentations = [response["summary_text"] for response in responses]
-      print(documentations)
-      
+      print(len(documentations))
+      print(len(self.snippets["function"]))
       for i, snippet in enumerate(self.snippets["function"]):
         id = self.snippets["id"][i]
         function_ids.append(id)
