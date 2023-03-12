@@ -1,5 +1,6 @@
 from transformers import AutoTokenizer, AutoModelWithLMHead, SummarizationPipeline
 import json
+import math
 
 class Code2DocModule():
     def __init__(self, snippets):
@@ -22,17 +23,23 @@ class Code2DocModule():
       function_ids = []
 
       count = 0
+      batch_size = 128
+      print("Begin processing {} functions!".format(len(self.snippets["function"])))
+      for i in range(1, math.ceil(len(self.snippets["function"]) / batch_size)):
+        self.model(self.snippets["function"][(i - 1) * batch_size: i * batch_size])
+        print(f"Batch {i} done!")
+      # responses = self.model(self.snippets["function"])
       
-      documentations = self.mode(self.snippets["function"])
+      batch_size
+      documentations = [response["summary_text"] for response in responses]
       print(documentations)
-      
       
       for i, snippet in enumerate(self.snippets["function"]):
         id = self.snippets["id"][i]
         function_ids.append(id)
         code_reference[id] = {
           "code": snippet,
-          "documentation": self.model([snippet])[0]["summary_text"],
+          "documentation": documentations[i],
           "reputation": self.snippets["features"]
         }
         count += 1
