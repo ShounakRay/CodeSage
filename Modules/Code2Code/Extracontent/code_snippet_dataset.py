@@ -1,17 +1,19 @@
 # IMPORTS
 from datasets import load_dataset
 from datasets.iterable_dataset import IterableDataset
+from Modules.Code2Code.Extracontent.code2doc import Code2DocModule
 import requests
 import ciso8601
+from typing import Dict
 import time
 import json
 from datetime import datetime
 
-DATASET_URI = "codeparrot/github-code"
-
+GITHUB_DATASET_URI = "codeparrot/github-code"
+ANNOTATED_DATASET_URI = 'michaelnath/annotated-code-functions-base'
 
 class CodeSnippetDataset:
-    def construct_feature_set(self, code_entry) -> dict[str:int]:
+    def construct_feature_set(self, code_entry):
         features = dict();
         user_repo_name = code_entry['repo_name'].split('/')
         owner = user_repo_name[0]
@@ -27,7 +29,7 @@ class CodeSnippetDataset:
         features["created_at"] = timestamp
         return features
     # THE BELOW IS FOR PYTHON FILES (LEVERAGES INDENTATION RULES)
-    def construct_list_of_functions(self, code_entry) -> list[str]:
+    def construct_list_of_functions(self, code_entry):
         raw_code = code_entry["code"]
         lines = raw_code.split('\n')
         start = -1
@@ -46,11 +48,15 @@ class CodeSnippetDataset:
         return functions
      
     def augment_code_entry(self, entry):
-        entry["reputation_features"] = self.construct_feature_set(entry)
-        entry["functions"] = self.construct_list_of_functions(entry)
+        if self.from_github:
+            entry["reputation_features"] = self.construct_feature_set(entry)
+            entry["functions"] = self.construct_list_of_functions(entry)
+        else: 
+            entry["id"] = hash(entry["function"])
+            entry["id"]
         return entry
         
-    def get_n_snippets(self, n: int) -> list[dict]:
+    def get_n_snippets(self, n: int, max_length: int):
         """Provides the next n code snippets from the GitHub dataset. 
 
         Args:
@@ -60,19 +66,35 @@ class CodeSnippetDataset:
             list[dict]: an array of size n, where each element is a dictionary containing the functions / 
             reputation features of a code snippet.
         """
-        snippets = self.dataset.take(n).remove_columns("code")
-        self.dataset = self.dataset.skip(n)
-        return list(snippets)        
+        if self.from_github:
+            snippets = self.dataset.take(n).remove_columns("code")
+            self.dataset = self.dataset.skip(n)
+            return list(snippets)     
+        else:
+            snippets = self.dataset.filter(lambda example: len(example["function"].split()) <= max_length)
+            return snippets[:n]
 
-    def __init__(self, languages: list[str]) -> None:
+    def annotate_functions_with_description(self, code_entries):
+        responses = Code2DocModule().model(code_entries["function"])
+        descriptions = [res["summary_text"] for res in responses]
+        code_entries["description"] = descriptions
+        return code_entries
+    
+    def __init__(self, languages, github=False, add_reps=False, add_docs=False) -> None:
         """__init__
         Args:
             languages (list[str]): programming languages to be included. Must be some of "Python", "Javascript", "Java", etc...
                                    for now only supports Python
         """
         
-        self.dataset : IterableDataset = load_dataset(DATASET_URI, streaming=True, split='train', languages=languages)
-        self.dataset : IterableDataset = self.dataset.map(self.augment_code_entry)
+        self.from_github = github
+        if self.from_github:
+            self.dataset : IterableDataset = load_dataset(GITHUB_DATASET_URI, streaming=True, split='train', languages=languages)
+        else:
+            self.dataset  = load_dataset(ANNOTATED_DATASET_URI, split="train")
+            if add_docs:
+                self.dataset = self.dataset.map(self.annotate_functions_with_description, batched=True)
+        self.dataset = self.dataset.map(self.augment_code_entry)
         
 # Example Usage
 if __name__ == "__main__":

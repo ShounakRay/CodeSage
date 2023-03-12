@@ -22,7 +22,6 @@ class ScoreClusters():
     for intent_category in self.clusters:
       intents = self.clusters[intent_category]
       if len(intents) == 1: continue
-      print(intents)
       sorted_intents = sorted(intents, reverse=True, key = lambda intent: compute_reputation_score(self.code_reference[intent]))
       self.scored_clusters[intent_category] = (sorted_intents[:floor(len(sorted_intents) / 2)], sorted_intents[floor(len(sorted_intents) / 2):])
       
@@ -31,8 +30,7 @@ class ScoreClusters():
         for bad_code_id in code_ids[1]:
             inputs.append(self.code_reference[bad_code_id]['code'])
         
-        for good_code_id in code_ids[0]:
-            outputs.append(self.code_reference[good_code_id]['code'])
+        outputs.append([self.code_reference[good_code_id]["code"] for good_code_id in code_ids[0]])
     
     dicty = dict();
     dicty["input"] = []
