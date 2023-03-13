@@ -54,8 +54,7 @@ code_snippets = CodeSnippetDataset(languages=["Python"],
 print("Got snippets!\n")
 
 # Get documentation from dataset
-code2doc = Code2DocModule(code_snippets,
-                          C2D_LLM = C2D_LLM)
+code2doc = Code2DocModule(code_snippets, C2D_LLM = C2D_LLM)
 data_with_docs = code2doc.get_docs()
     
 print("Got documentations!\n")
