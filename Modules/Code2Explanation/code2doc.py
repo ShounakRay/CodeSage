@@ -11,8 +11,8 @@ class Code2DocModule():
 
     def train_model(self, batch_size=4):
       model = SummarizationPipeline(
-      model=AutoModelWithLMHead.from_pretrained("SEBIS/code_trans_t5_large_code_documentation_generation_python_multitask_finetune"),
-      tokenizer=AutoTokenizer.from_pretrained("SEBIS/code_trans_t5_large_code_documentation_generation_python_multitask_finetune", skip_special_tokens=True), device=0)
+      model=AutoModelWithLMHead.from_pretrained("SEBIS/code_trans_t5_base_code_documentation_generation_python_multitask_finetune"),
+      tokenizer=AutoTokenizer.from_pretrained("SEBIS/code_trans_t5_base_code_documentation_generation_python_multitask_finetune", skip_special_tokens=True), device=0)
       return model
     
     def write_to_file(self, data):
@@ -33,7 +33,7 @@ class Code2DocModule():
                     presence_penalty=0.0,
                     stop=["."]
                   )
-        return response.choices[0].text
+        return response.choices[0].text.strip()
     
     # detailed_description, purpose, runtime 
     def get_gpt_doc(self, func, type="detailed_description"):
@@ -64,6 +64,12 @@ class Code2DocModule():
                   )
         return response.choices[0].text.strip()
 
+    def get_code_trans_docs(self, funcs):
+      # train the model!
+      model = self.train_model()
+
+      return [result['summary_text'] for result in model(funcs)]
+
     def get_docs(self, snippets, inference_batch_size = 4):
       # train the model!
       model = self.train_model()
@@ -76,7 +82,7 @@ class Code2DocModule():
       documentations = []
       for i in range(1, math.ceil(len(snippets["function"]) / inference_batch_size) + 1):
         with torch.no_grad():
-          responses = self.model(snippets["function"][(i - 1) * inference_batch_size: i * inference_batch_size])
+          responses = model(snippets["function"][(i - 1) * inference_batch_size: i * inference_batch_size])
         documentations += [response["summary_text"] for response in responses]
         print(f"Batch {i} done!")
       print(len(documentations))
@@ -103,7 +109,5 @@ class Code2DocModule():
          "function_ids": function_ids,
          "code_reference": code_reference
       }
-
-      self.write_to_file(data)
       
       return data
