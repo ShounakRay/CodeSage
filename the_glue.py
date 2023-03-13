@@ -17,8 +17,8 @@ print("Got snippets!")
 
 
 # Get documentation from dataset
-code2doc = Code2DocModule(code_snippets, DOCUMENTATION_INFERENCE_BATCH_SIZE)
-data_with_docs = code2doc.get_docs()
+code2doc = Code2DocModule()
+data_with_docs = code2doc.get_docs(code_snippets, DOCUMENTATION_INFERENCE_BATCH_SIZE)
     
 print("Got documentations!")
 
