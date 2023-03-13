@@ -63,6 +63,8 @@ def augment_code_entry(entries):
         PAD_LENGTH = 512
         for i in range(len(entries["code"])):
             functions = construct_list_of_functions(entries["code"][i])
+            if len(functions) >= PAD_LENGTH:
+                functions = functions[:PAD_LENGTH]
             entries["functions"].append(functions + [PAD_WORD] * max(0, PAD_LENGTH - len(functions)))
             if repo_to_features_mapping.get(entries["repo_name"][i], None) == None:
                 repo_to_features_mapping[entries["repo_name"][i]] = construct_feature_set(entries["repo_name"][i])
