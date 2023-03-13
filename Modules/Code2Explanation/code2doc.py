@@ -21,48 +21,67 @@ class Code2DocModule():
     
     # purpose, runtime
     def get_codex_doc(self, func, type="purpose"):
-      if (type == "purpose"):
-        prompt = "# Python 3\n" + func + '"""\nThe purpose of the above function is'
-        response = openai.Completion.create(
-                    model="code-davinci-002",
-                    prompt=prompt,
-                    temperature=0,
-                    max_tokens=50,
-                    top_p=1.0,
-                    frequency_penalty=0.0,
-                    presence_penalty=0.0,
-                    stop=["."]
-                  )
-        return response.choices[0].text.strip()
+      try:
+        if (type == "purpose"):
+          prompt = "# Python 3\n" + func + '"""\nThe purpose of the above function is'
+          response = openai.Completion.create(
+                      model="code-davinci-002",
+                      prompt=prompt,
+                      temperature=0,
+                      max_tokens=50,
+                      top_p=1.0,
+                      frequency_penalty=0.0,
+                      presence_penalty=0.0,
+                      stop=["."]
+                    )
+          return response.choices[0].text.strip()
+        elif (type == "runtime"):
+          prompt = "# Python 3\n" + func + '"""\nThe runtime of the above function is'
+          response = openai.Completion.create(
+                      model="code-davinci-002",
+                      prompt=prompt,
+                      temperature=0,
+                      max_tokens=50,
+                      top_p=1.0,
+                      frequency_penalty=0.0,
+                      presence_penalty=0.0,
+                      stop=["."]
+                    )
+          return response.choices[0].text.strip()
+      except:
+        return ""
+
     
     # detailed_description, purpose, runtime 
     def get_gpt_doc(self, func, type="detailed_description"):
-
-      if (type == "detailed_description"):
-        prompt = func + "\nWhat does this function do?"
-        response = openai.Completion.create(
-                    model="text-davinci-003",
-                    prompt=prompt,
-                    temperature=0,
-                    max_tokens=50,
-                    top_p=1.0,
-                    frequency_penalty=0.0,
-                    presence_penalty=0.0,
-                  )
-        return response.choices[0].text.strip()
-      elif (type == "purpose"):
-        prompt = func + "\nThe purpose of this function is"
-        response = openai.Completion.create(
-                    model="text-davinci-003",
-                    prompt=prompt,
-                    temperature=0,
-                    max_tokens=50,
-                    top_p=1.0,
-                    frequency_penalty=0.0,
-                    presence_penalty=0.0,
-                    stop=["."]
-                  )
-        return response.choices[0].text.strip()
+      try: 
+        if (type == "detailed_description"):
+          prompt = func + "\nWhat does this function do?"
+          response = openai.Completion.create(
+                      model="text-davinci-003",
+                      prompt=prompt,
+                      temperature=0,
+                      max_tokens=50,
+                      top_p=1.0,
+                      frequency_penalty=0.0,
+                      presence_penalty=0.0,
+                    )
+          return response.choices[0].text.strip()
+        elif (type == "purpose"):
+          prompt = func + "\nThe purpose of this function is"
+          response = openai.Completion.create(
+                      model="text-davinci-003",
+                      prompt=prompt,
+                      temperature=0,
+                      max_tokens=50,
+                      top_p=1.0,
+                      frequency_penalty=0.0,
+                      presence_penalty=0.0,
+                      stop=["."]
+                    )
+          return response.choices[0].text.strip()
+      except:
+        return ""
 
     def get_code_trans_docs(self, funcs):
       # train the model!
