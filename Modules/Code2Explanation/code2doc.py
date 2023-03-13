@@ -5,7 +5,7 @@ import math
 from random import choice
 from string import ascii_lowercase
 import openai
-openai.api_key = "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"
+openai.api_key = ""
 
 class Code2DocModule():
 
