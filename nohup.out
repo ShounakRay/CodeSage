@@ -1,0 +1,38 @@
+Using custom data configuration michaelnath--annotated-code-functions-base-109e1212a74aeb76
+Found cached dataset parquet (/Users/michaelnath/.cache/huggingface/datasets/michaelnath___parquet/michaelnath--annotated-code-functions-base-109e1212a74aeb76/0.0.0/2a3b91fbd88a2c90d1dbbb32b460cf621d31bd5b05b934492fdef7d8d6f236ec)
+  0%|          | 0/28383 [00:00<?, ?ex/s]  7%|▋         | 2000/28383 [00:00<00:01, 18288.54ex/s] 16%|█▌        | 4426/28383 [00:00<00:01, 21668.51ex/s] 24%|██▍       | 6916/28383 [00:00<00:00, 23096.50ex/s] 33%|███▎      | 9236/28383 [00:00<00:00, 22603.18ex/s] 42%|████▏     | 11794/28383 [00:00<00:00, 23650.45ex/s] 50%|████▉     | 14167/28383 [00:00<00:00, 23346.80ex/s] 59%|█████▊    | 16657/28383 [00:00<00:00, 23843.75ex/s] 67%|██████▋   | 19046/28383 [00:00<00:00, 23568.81ex/s] 75%|███████▌  | 21407/28383 [00:00<00:00, 19500.88ex/s] 84%|████████▍ | 23935/28383 [00:01<00:00, 21037.21ex/s] 92%|█████████▏| 26217/28383 [00:01<00:00, 21528.23ex/s]100%|██████████| 28383/28383 [00:01<00:00, 22201.27ex/s]
+Traceback (most recent call last):
+  File "/Users/michaelnath/program/stanford/cs224n/CodeSage/the_glue.py", line 10, in <module>
+    code_snippets = dataset.get_n_snippets(N_SNIPPETS)
+TypeError: get_n_snippets() missing 1 required positional argument: 'max_length'
+Using custom data configuration michaelnath--annotated-code-functions-base-109e1212a74aeb76
+Found cached dataset parquet (/Users/michaelnath/.cache/huggingface/datasets/michaelnath___parquet/michaelnath--annotated-code-functions-base-109e1212a74aeb76/0.0.0/2a3b91fbd88a2c90d1dbbb32b460cf621d31bd5b05b934492fdef7d8d6f236ec)
+Loading cached processed dataset at /Users/michaelnath/.cache/huggingface/datasets/michaelnath___parquet/michaelnath--annotated-code-functions-base-109e1212a74aeb76/0.0.0/2a3b91fbd88a2c90d1dbbb32b460cf621d31bd5b05b934492fdef7d8d6f236ec/cache-f8dc50458ac97b01.arrow
+  0%|          | 0/29 [00:00<?, ?ba/s]  3%|▎         | 1/29 [00:00<00:03,  8.58ba/s] 31%|███       | 9/29 [00:00<00:00, 47.07ba/s] 62%|██████▏   | 18/29 [00:00<00:00, 62.45ba/s] 90%|████████▉ | 26/29 [00:00<00:00, 67.23ba/s]100%|██████████| 29/29 [00:00<00:00, 61.54ba/s]
+/Users/michaelnath/.virtualenvs/224n_final_proj/lib/python3.9/site-packages/transformers/models/auto/modeling_auto.py:1248: FutureWarning: The class `AutoModelWithLMHead` is deprecated and will be removed in a future version. Please use `AutoModelForCausalLM` for causal language models, `AutoModelForMaskedLM` for masked language models and `AutoModelForSeq2SeqLM` for encoder-decoder models.
+  warnings.warn(
+Got snippets!
+Traceback (most recent call last):
+  File "/Users/michaelnath/program/stanford/cs224n/CodeSage/the_glue.py", line 15, in <module>
+    code2doc = Code2DocModule(code_snippets)
+  File "/Users/michaelnath/program/stanford/cs224n/CodeSage/Modules/Code2Explanation/code2doc.py", line 11, in __init__
+    self.model = self.train_model()
+  File "/Users/michaelnath/program/stanford/cs224n/CodeSage/Modules/Code2Explanation/code2doc.py", line 14, in train_model
+    model = SummarizationPipeline(
+  File "/Users/michaelnath/.virtualenvs/224n_final_proj/lib/python3.9/site-packages/transformers/pipelines/text2text_generation.py", line 65, in __init__
+    super().__init__(*args, **kwargs)
+  File "/Users/michaelnath/.virtualenvs/224n_final_proj/lib/python3.9/site-packages/transformers/pipelines/base.py", line 780, in __init__
+    self.model = self.model.to(self.device)
+  File "/Users/michaelnath/.virtualenvs/224n_final_proj/lib/python3.9/site-packages/transformers/modeling_utils.py", line 1749, in to
+    return super().to(*args, **kwargs)
+  File "/Users/michaelnath/.virtualenvs/224n_final_proj/lib/python3.9/site-packages/torch/nn/modules/module.py", line 989, in to
+    return self._apply(convert)
+  File "/Users/michaelnath/.virtualenvs/224n_final_proj/lib/python3.9/site-packages/torch/nn/modules/module.py", line 641, in _apply
+    module._apply(fn)
+  File "/Users/michaelnath/.virtualenvs/224n_final_proj/lib/python3.9/site-packages/torch/nn/modules/module.py", line 664, in _apply
+    param_applied = fn(param)
+  File "/Users/michaelnath/.virtualenvs/224n_final_proj/lib/python3.9/site-packages/torch/nn/modules/module.py", line 987, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+  File "/Users/michaelnath/.virtualenvs/224n_final_proj/lib/python3.9/site-packages/torch/cuda/__init__.py", line 221, in _lazy_init
+    raise AssertionError("Torch not compiled with CUDA enabled")
+AssertionError: Torch not compiled with CUDA enabled

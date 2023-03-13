@@ -10,7 +10,9 @@ DOCUMENTATION_INFERENCE_BATCH_SIZE = 4
 
 # Get Dataset
 dataset = CodeSnippetDataset(github=False, languages=["Python"])
+
 code_snippets = dataset.get_n_snippets(N_SNIPPETS, max_length=MAX_FUNCTION_STRING_LENGTH)
+
 print("Got snippets!")
 
 
@@ -29,6 +31,8 @@ print("Got clusters!")
 # Score clusters
 clusters2scoredDataset = ScoreClusters(clusters, data_with_docs['code_reference'])
 scored_dataset = clusters2scoredDataset.get_scored_dataset()
+print(scored_dataset[0])
+
 print("Scored clusters!")
 
 print(scored_dataset[0])
