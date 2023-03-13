@@ -7,7 +7,7 @@ N_SNIPPETS = 100
 
 # Get Dataset
 dataset = CodeSnippetDataset(github=False, languages=["Python"])
-code_snippets = dataset.get_n_snippets(N_SNIPPETS)
+code_snippets = dataset.get_n_snippets(N_SNIPPETS, max_length=512)
 print("Got snippets!")
 
 
@@ -25,6 +25,8 @@ print("Got clusters!")
 # Score clusters
 clusters2scoredDataset = ScoreClusters(clusters, data_with_docs['code_reference'])
 scored_dataset = clusters2scoredDataset.get_scored_dataset()
+print(scored_dataset[0])
+
 print("Scored clusters!")
 
 # Train with Seq2Seq model

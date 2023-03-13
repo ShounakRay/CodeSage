@@ -34,17 +34,21 @@ class CodeSnippetDataset:
         lines = raw_code.split('\n')
         start = -1
         functions = []
+        begin_considering_function_termination = False
         amnt_tabs = 0
         for i in range(len(lines)):
             # disregard empty lines (prune trailing whitespace later)
             if (start != -1 and len(lines[i]) > 0):
                 amnt_tabs_new = len(lines[i].rstrip()) - len(lines[i].strip())
-                if amnt_tabs_new <= amnt_tabs:
+                if amnt_tabs_new <= amnt_tabs and begin_considering_function_termination:
                     functions.append(("\n".join(lines[start:i])).strip())
                     start = -1
-            elif lines[i].lstrip().startswith("def "):
+                    begin_considering_function_termination = False
+            if lines[i].lstrip().startswith(("def ", "async def ")):
                 start = i
                 amnt_tabs = len(lines[i].rstrip()) - len(lines[i].strip())
+            if start != -1 and not begin_considering_function_termination and ":" in lines[i] and ")" in lines[i]:
+                begin_considering_function_termination = True 
         return functions
      
     def augment_code_entry(self, entry):
@@ -67,7 +71,7 @@ class CodeSnippetDataset:
             reputation features of a code snippet.
         """
         if self.from_github:
-            snippets = self.dataset.take(n).remove_columns("code")
+            snippets = self.dataset.remove_columns("code").filter(lambda example: len(example["function"].split()) <= max_length).take(n)
             self.dataset = self.dataset.skip(n)
             return list(snippets)     
         else:
