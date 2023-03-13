@@ -55,18 +55,19 @@ print("Got snippets!\n")
 
 # Get documentation from dataset
 code2doc = Code2DocModule(code_snippets,
-                          verbosity = C2D_VERBOSITY,
                           C2D_LLM = C2D_LLM)
 data_with_docs = code2doc.get_docs()
     
 print("Got documentations!\n")
 
 # Turn dataset into clusters
-doc2clusters = IntentClustering(function_ids=data_with_docs['function_ids'], code_reference=data_with_docs['code_reference'],
-                                IC_ALGO=IC_ALGO,
-                                IC_KVAL=IC_KVAL)
-clusters = doc2clusters.get_clusters()
+doc2clusters = IntentClustering(function_ids=data_with_docs['function_ids'], code_reference=data_with_docs['code_reference'])
+clusters = doc2clusters.core_get_clusters(embedder="STrans", method='kmeans', n_clusters=IC_KVAL, eps=0.5, min_samples=5, n_jobs=-1)
 print("Got clusters!\n")
+"""
+Cluster output is:
+{ cluster_id (int) : [function_id, function_id, function_id (Any)] }
+"""
 
 # Score clusters
 clusters2scoredDataset = ScoreClusters(clusters, data_with_docs['code_reference'],
