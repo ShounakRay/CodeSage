@@ -255,7 +255,7 @@ data = vectorize(_get_data(source='json'), mode='pretrained')
 print("Input Data:\n", data, "\n\n")
 # data = _normalize(data)
 
-def run_model():
+def run_model(data=data):
     # Class/categorical balance is important!
     neurons = 5 * np.sqrt(len(data)) / 2
     learning_rate = 0.4
