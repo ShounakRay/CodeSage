@@ -49,24 +49,17 @@ assert 0.001 <= C2C_WEIGHT_DECAY <= 0.1
 dataset = CodeSnippetDataset(github=False, languages=["Python"])
 code_snippets = dataset.get_n_snippets(N_SNIPPETS, max_length=MAX_FUNCTION_STRING_LENGTH)
 print("Got snippets!\n")
+"""
+[code_string_raw, code_string_raw]
+
+[]
+"""
 
 
 # Transforms dataset into code format
 code2doc = Code2DocModule()
 data_with_docs = code2doc.get_docs(code_snippets, C2D_LLM = C2D_LLM)
-"""
-data_with_docs = {
- 	function_ids: [“id1”],
- 	code_reference: {
- 		“id1”: {
- 			“code”: …,
- 			“reputation”: […,…,,..,..],
- 			“documentation”: depends on C2D_LLM(string)
 
- 		}
- 	}
- }
-"""
 
 print("Got documentations!\n")
 
