@@ -1,17 +1,19 @@
 # IMPORTS
 from datasets import load_dataset
 from datasets.iterable_dataset import IterableDataset
+from Modules.Code2Code.Extracontent.code2doc import Code2DocModule
 import requests
 import ciso8601
+from typing import Dict
 import time
 import json
 from datetime import datetime
 
-DATASET_URI = "codeparrot/github-code"
-
+GITHUB_DATASET_URI = "codeparrot/github-code"
+ANNOTATED_DATASET_URI = 'michaelnath/annotated-code-functions-base'
 
 class CodeSnippetDataset:
-    def construct_feature_set(self, code_entry) -> dict[str:int]:
+    def construct_feature_set(self, code_entry):
         features = dict();
         user_repo_name = code_entry['repo_name'].split('/')
         owner = user_repo_name[0]
@@ -27,61 +29,81 @@ class CodeSnippetDataset:
         features["created_at"] = timestamp
         return features
     # THE BELOW IS FOR PYTHON FILES (LEVERAGES INDENTATION RULES)
-    def construct_list_of_functions(self, code_entry) -> list[str]:
+    def construct_list_of_functions(self, code_entry):
         raw_code = code_entry["code"]
         lines = raw_code.split('\n')
         start = -1
         functions = []
+        begin_considering_function_termination = False
         amnt_tabs = 0
         for i in range(len(lines)):
             # disregard empty lines (prune trailing whitespace later)
             if (start != -1 and len(lines[i]) > 0):
                 amnt_tabs_new = len(lines[i].rstrip()) - len(lines[i].strip())
-                if amnt_tabs_new <= amnt_tabs:
+                if amnt_tabs_new <= amnt_tabs and begin_considering_function_termination:
                     functions.append(("\n".join(lines[start:i])).strip())
                     start = -1
-            elif lines[i].lstrip().startswith("def "):
+                    begin_considering_function_termination = False
+            if lines[i].lstrip().startswith(("def ", "async def ")):
                 start = i
                 amnt_tabs = len(lines[i].rstrip()) - len(lines[i].strip())
+            if start != -1 and not begin_considering_function_termination and ":" in lines[i] and ")" in lines[i]:
+                begin_considering_function_termination = True 
         return functions
      
     def augment_code_entry(self, entry):
-        entry["reputation_features"] = self.construct_feature_set(entry)
-        entry["functions"] = self.construct_list_of_functions(entry)
+        if self.from_github:
+            entry["reputation_features"] = self.construct_feature_set(entry)
+            entry["functions"] = self.construct_list_of_functions(entry)
+        else: 
+            entry["id"] = hash(entry["function"])
+            entry["id"]
         return entry
         
-    def get_n_snippets(self, n: int) -> list[dict]:
-        """Provides the next n code snippets from the GitHub dataset. 
+    def get_n_snippets(self, n: int, max_length : int = None):
+        """Provides the next n code snippets from the source dataset.
+            If source dataset is not from GitHub, this function will also only return snippets having length at most `max_length`
 
         Args:
             n (int): number of snippets desired
+            max_length (int): the max number of words permitted in 
 
         Returns:
             list[dict]: an array of size n, where each element is a dictionary containing the functions / 
             reputation features of a code snippet.
         """
-        snippets = self.dataset.take(n).remove_columns("code")
-        self.dataset = self.dataset.skip(n)
-        return list(snippets)        
+        if self.from_github:
+            snippets = self.dataset.remove_columns("code").filter(lambda example: len(example["function"].split()) <= max_length).take(n)
+            self.dataset = self.dataset.skip(n)
+            return list(snippets)     
+        else:
+            snippets = self.dataset.filter(lambda example: len(example["function"].split()) <= max_length)
+            return snippets[:n]
 
-    def __init__(self, languages: list[str]) -> None:
+    def annotate_functions_with_description(self, code_entries):
+        responses = Code2DocModule().model(code_entries["function"])
+        descriptions = [res["summary_text"] for res in responses]
+        code_entries["description"] = descriptions
+        return code_entries
+    
+    def __init__(self, languages, github=False, add_reps=False, add_docs=False) -> None:
         """__init__
         Args:
             languages (list[str]): programming languages to be included. Must be some of "Python", "Javascript", "Java", etc...
                                    for now only supports Python
         """
         
-        self.dataset : IterableDataset = load_dataset(DATASET_URI, streaming=True, split='train', languages=languages)
-        self.dataset : IterableDataset = self.dataset.map(self.augment_code_entry)
+        self.from_github = github
+        if self.from_github:
+            self.dataset : IterableDataset = load_dataset(GITHUB_DATASET_URI, streaming=True, split='train', languages=languages)
+        else:
+            self.dataset  = load_dataset(ANNOTATED_DATASET_URI, split="train")
+            if add_docs:
+                self.dataset = self.dataset.map(self.annotate_functions_with_description, batched=True)
+        self.dataset = self.dataset.map(self.augment_code_entry)
         
 # Example Usage
 if __name__ == "__main__":
-    # ds = CodeSnippetDataset(languages=["Python"])
-    # snippets = ds.get_n_snippets(4)
-    # print(snippets[0])
-    # snippets = ds.get_n_snippets(4)
-    # print(snippets[0]) # will NOT be the same as in previous invocation
-    # print("\n".join(snippets[0]["functions"]))
     owner = "Azure"
     repo = "azure-sdk-for-python"
     repo_response = requests.get(f"https://api.github.com/repos/{owner}/{repo}")

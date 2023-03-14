@@ -9,8 +9,9 @@ class T5Code2CodeModel(BaseCode2CodeModel):
     def __init__(
         self, 
         model_size: str, 
-        max_length=128,     
-        truncation=True, 
+        max_length=512,     
+        truncation=True,
+        metric="chrf" 
             ):
         """Init salesforce codet5 model of a given size
 
@@ -19,7 +20,7 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         """
         super().__init__()
         self.pretrained_model_name += model_size
-        self.metric = evaluate.load('sacrebleu')
+        self.metric = evaluate.load(metric)
         self.pretrained_model = T5ForConditionalGeneration.from_pretrained(self.pretrained_model_name)
         self.max_length = max_length
         self.truncation = truncation
@@ -27,10 +28,19 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         self.finetuned_model_name = self.pretrained_model_name
     
     def preprocess_function(self, examples: Dataset):
+        
         inputs = [self.prefix + example for example in examples["input"]]
         outputs = [example for example in examples["target"]]
-        model_inputs = self.tokenizer(inputs, text_target=outputs, max_length=128, truncation=True)
-        return model_inputs
+        # max_cluster_amount = 50
+        # tokenized_input_references_pairs = {"input_ids": [], "labels": []}
+        # for i in range(len(inputs)):
+        #     references = outputs[i] + max(0, max_cluster_amount - len(outputs[i])) * ["BLEH"]
+        #     encodings_i = self.tokenizer(inputs[i], text_target=references, max_length=512, truncation=True)
+        #     tokenized_input_references_pairs["input_ids"].append(encodings_i["input_ids"])
+        #     tokenized_input_references_pairs["labels"].append(encodings_i["labels"])
+        # print(tokenized_input_references_pairs)
+        tokenized_input_references_pairs = self.tokenizer(inputs, text_target=outputs, max_length=self.max_length, truncation=True)
+        return tokenized_input_references_pairs
 
     def postprocess_text(self, preds, labels):
         preds = [pred.strip() for pred in preds]
@@ -46,7 +56,7 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         decoded_labels = self.tokenizer.batch_decode(labels, skip_special_tokens=True)
         decoded_preds, decoded_labels = self.postprocess_text(decoded_preds, decoded_labels)
         result = self.metric.compute(predictions=decoded_preds, references=decoded_labels)
-        result = {"bleu": result["score"]}
+        result = {"chrf": result["score"]}
         prediction_lens = [np.count_nonzero(pred != self.tokenizer.pad_token_id) for pred in preds]
         result["gen_len"] = np.mean(prediction_lens)
         result = {k: round(v, 4) for k, v in result.items()}
@@ -58,8 +68,8 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         output_model_dir: str,
         test_size=0.2,
         learning_rate=2e-5,
-        per_device_train_batch_size=16,
-        per_device_eval_batch_size=16,
+        per_device_train_batch_size=4,
+        per_device_eval_batch_size=4,
         weight_decay=0.01,
         num_train_epochs=2,
     ):
@@ -99,7 +109,7 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         except:
             print("Error pushing automatically to hub. Push manually via Python REPL.")
     
-    def __call__(self, input_bad_code: str) -> list[dict[str:str]]:
+    def __call__(self, input_bad_code: str):
         text = self.prefix + input_bad_code
         model = T5ForConditionalGeneration.from_pretrained(self.finetuned_model_name)
         tokenizer = RobertaTokenizer.from_pretrained(self.pretrained_model_name)
