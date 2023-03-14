@@ -154,7 +154,7 @@ def run_end_to_end_with_parameters(
       assert 1 <= C2C_BATCH_SIZE <= 64
       assert 0.01 <= C2C_WEIGHT_DECAY <= 0.1 
       dataset = load_dataset(FUNCTIONS_DATASET_URI, split="train")
-      code_snippets = dataset.filter(lambda example: len(example["function"].split()) <= MAX_FUNCTION_STRING_LENGTH)[:]
+      code_snippets = dataset.filter(lambda example: len(example["function"].split()) <= MAX_FUNCTION_STRING_LENGTH)[:500]
       code2doc = Code2DocModule()
       data_with_docs = code2doc.get_docs(code_snippets, C2D_LLM = C2D_LLM) 
       doc2clusters = IntentClustering(function_ids=data_with_docs['function_ids'], code_reference=data_with_docs['code_reference'])
