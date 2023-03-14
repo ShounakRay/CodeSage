@@ -9,7 +9,7 @@ import numpy as np
 ######################### HYPERPARAMETERS ##############################
 ########################################################################
 
-N_SNIPPETS = 100;
+N_SNIPPETS = 100
 
 C2D_VERBOSITY = 1
 assert C2D_VERBOSITY in (1, 2, 3, 4, 5)

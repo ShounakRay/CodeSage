@@ -251,10 +251,10 @@ class SOM:
 # data = _normalize(data)
 # # _ = plt.scatter(*zip(*data))
 """ VECTORIZED TEXT DATA – 4 Categories """
-data = vectorize(_get_data(source='json'), mode='pretrained')
-print("Input Data:\n", data, "\n\n")
-# data = _normalize(data)
-
+# data = vectorize(_get_data(source='json'), mode='pretrained')
+# print("Input Data:\n", data, "\n\n")
+# # data = _normalize(data)
+raise NotImplementedError
 def run_model(data=data):
     # Class/categorical balance is important!
     neurons = 5 * np.sqrt(len(data)) / 2

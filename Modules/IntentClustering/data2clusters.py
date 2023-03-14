@@ -6,6 +6,15 @@ import numpy as np
 
 from datasets import load_dataset
 
+"""
+FOR TESTING PURPOSES:
+git clone https://github.com/TheAlgorithms/Python/tree/master
+Each folder is it's own intent category (roughly)
+Just feed these through the clustering algorithm(s)
+See how many clusters it comes up with
+
+"""
+
 class IntentClustering():
    def __init__(self, function_ids, code_reference, IC_ALGO, IC_KVAL):
       self.function_ids = function_ids
