@@ -15,9 +15,9 @@ N_SNIPPETS = 100
 C2D_LLM = 'CODETRANS'
 assert C2D_LLM in  ('CODETRANS', 'CODEX', 'GPT')
 
-IC_ALGO = 'KMEANS'
-assert IC_ALGO in ("KMEANS/SOM, KMEANS, DBSCSAN")
-IC_KVAL = 10
+# IC_ALGO = 'KMEANS'
+# assert IC_ALGO in ("KMEANS/SOM, KMEANS, DBSCSAN")
+# IC_KVAL = 10
 # assert type(IC_KVAL) == np.number
 
 SC_LOWPERC = 0.1
@@ -27,7 +27,7 @@ assert 0.01 <= SC_HIGHPERC <= 0.99
 SC_BOUNDARY = 50
 print(f"CUSTOM NOTE: Ensure that `SC_BOUNDARY` is set to - say - \
       the overall median of scores across all clusters.\n\n")
-SC_METHOD = 'PERCENTILE'
+SC_METHOD = 'STARS + FORKS + WATCHERS - OPEN_ISSUES'
 assert SC_METHOD in ('PERCENTILE', 'SHARED')
 
 C2C_LLM = 'CODE-T5'
@@ -70,7 +70,6 @@ data_with_docs = code2doc.get_docs(code_snippets, C2D_LLM = C2D_LLM)
 print("Got documentations!\n")
 
 # Turn dataset into clusters
-
 doc2clusters = IntentClustering(function_ids=data_with_docs['function_ids'], code_reference=data_with_docs['code_reference'])
 clusters = doc2clusters.core_get_clusters(embedder="STrans", method='kmeans', n_clusters=IC_KVAL, eps=0.5, min_samples=5, n_jobs=-1)
 
@@ -81,11 +80,13 @@ Cluster output is:
 """
 
 # Score clusters
-clusters2scoredDataset = ScoreClusters(clusters, data_with_docs['code_reference'])
+clusters2scoredDataset = ScoreClusters(clusters, data_with_docs['code_reference'],
+                                       SC_METHOD=SC_METHOD,
+                                       SC_LOWPERC=SC_LOWPERC if SC_METHOD == 'PERCENTILE' else None,
+                                       SC_HIGHPERC=SC_HIGHPERC if SC_METHOD == 'PERCENTILE' else None,
+                                       SC_BOUNDARY=SC_BOUNDARY if SC_METHOD == 'SHARED' else None)
 scored_dataset = clusters2scoredDataset.get_scored_dataset()
-print(scored_dataset[0])
-
-print("Scored clusters!")
+print("Scored clusters!\n")
 
 MODEL_OUTPUT_DIR = "c2c_model_with_chrf_and_nonzero_reps"
 # Train with Seq2Seq model
@@ -100,7 +101,7 @@ model.train(scored_dataset,
             )
 # print("Trained model!")
 
-# Perform inference
-example_bad_function = "def hello_world(): pfds('hello_world')"
-resulting_good_function = model(example_bad_function)["translation_text"]
-print(resulting_good_function)
+# # Perform inference
+# example_bad_function = "def hello_world(): pfds('hello_world')"
+# resulting_good_function = model(example_bad_function)["translation_text"]
+# print(resulting_good_function)
