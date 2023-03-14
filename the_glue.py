@@ -32,6 +32,12 @@ assert SC_METHOD in ('PERCENTILE', 'SHARED')
 
 C2C_LLM = 'CODE-T5'
 assert C2C_LLM in ('CODE-T5', 'SOMETHING_ELSE')
+
+C2C_EVAL_METRIC = "bleu"
+assert C2C_EVAL_METRIC in ('bleu', 'chrf')
+
+C2C_TEST_SIZE = 0.2
+
 C2C_LR = 0.3
 assert 0.05 <= C2C_LR <= 0.95
 C2C_EPOCH_N = 2
@@ -81,9 +87,17 @@ print(scored_dataset[0])
 
 print("Scored clusters!")
 
+MODEL_OUTPUT_DIR = "c2c_model_with_chrf_and_nonzero_reps"
 # Train with Seq2Seq model
-model = T5Code2CodeModel("base")
-model.train(scored_dataset, "c2c_model_with_chrf_and_nonzero_reps")
+model = T5Code2CodeModel("base", C2C_EVAL_METRIC=C2C_EVAL_METRIC)
+model.train(scored_dataset, 
+            MODEL_OUTPUT_DIR, 
+            C2C_TEST_SIZE=C2C_TEST_SIZE, 
+            C2C_LR=C2C_LR, 
+            C2C_BATCH_SIZE=C2C_BATCH_SIZE, 
+            C2C_WEIGHT_DECAY=C2C_WEIGHT_DECAY, 
+            C2C_EPOCH_N=C2C_EPOCH_N
+            )
 # print("Trained model!")
 
 # Perform inference

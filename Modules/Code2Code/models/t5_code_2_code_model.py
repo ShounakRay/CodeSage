@@ -11,7 +11,7 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         model_size: str, 
         max_length=512,     
         truncation=True,
-        metric="chrf" 
+        C2C_EVAL_METRIC="chrf" 
             ):
         """Init salesforce codet5 model of a given size
 
@@ -20,7 +20,7 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         """
         super().__init__()
         self.pretrained_model_name += model_size
-        self.metric = evaluate.load(metric)
+        self.metric = evaluate.load(C2C_EVAL_METRIC)
         self.pretrained_model = T5ForConditionalGeneration.from_pretrained(self.pretrained_model_name)
         self.max_length = max_length
         self.truncation = truncation
@@ -66,14 +66,13 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         self,
         dataset: Dataset,
         output_model_dir: str,
-        test_size=0.2,
-        learning_rate=2e-5,
-        per_device_train_batch_size=4,
-        per_device_eval_batch_size=4,
-        weight_decay=0.01,
-        num_train_epochs=2,
+        C2C_TEST_SIZE=0.2,
+        C2C_LR=2e-5,
+        C2C_BATCH_SIZE=4,
+        C2C_WEIGHT_DECAY=0.01,
+        C2C_EPOCH_N=2,
     ):
-        dataset = dataset.map(self.preprocess_function, batched=True, num_proc=4).train_test_split(test_size=test_size)
+        dataset = dataset.map(self.preprocess_function, batched=True, num_proc=4).train_test_split(test_size=C2C_TEST_SIZE)
         train_dataset = dataset["train"]
         eval_dataset = dataset["test"]
         data_collator = DataCollatorForSeq2Seq(tokenizer=self.tokenizer, model=self.pretrained_model)
@@ -81,12 +80,12 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         training_args = Seq2SeqTrainingArguments(
             output_dir=output_model_dir,
             evaluation_strategy="epoch",
-            learning_rate=learning_rate,
-            per_device_train_batch_size=per_device_train_batch_size,
-            per_device_eval_batch_size=per_device_eval_batch_size,
-            weight_decay=weight_decay,
-            save_total_limit=num_train_epochs + 1,
-            num_train_epochs=num_train_epochs,
+            learning_rate=C2C_LR,
+            per_device_train_batch_size=C2C_BATCH_SIZE,
+            per_device_eval_batch_size=C2C_BATCH_SIZE,
+            weight_decay=C2C_WEIGHT_DECAY,
+            save_total_limit=C2C_EPOCH_N + 1,
+            num_train_epochs=C2C_EPOCH_N,
             predict_with_generate=True,
             fp16=True,
             push_to_hub=False,
