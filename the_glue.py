@@ -20,22 +20,18 @@ print("Got snippets!")
 code2doc = Code2DocModule()
 data_with_docs = code2doc.get_docs(code_snippets, DOCUMENTATION_INFERENCE_BATCH_SIZE)
     
-print("Got documentations!")
+print("Got documentations!\n")
 
 # Turn dataset into clusters
-<<<<<<< Updated upstream
-doc2clusters = IntentClustering(data_with_docs['function_ids'], data_with_docs['code_reference'])
-clusters = doc2clusters.get_clusters(n_clusters=5)
-print("Got clusters!")
-=======
+
 doc2clusters = IntentClustering(function_ids=data_with_docs['function_ids'], code_reference=data_with_docs['code_reference'])
-clusters = doc2clusters.core_get_clusters(embedder="STrans", method='kmeans', n_clusters=5, eps=0.5, min_samples=5, n_jobs=-1)
+clusters = doc2clusters.core_get_clusters(embedder="STrans", method='kmeans', n_clusters=IC_KVAL, eps=0.5, min_samples=5, n_jobs=-1)
+
 print("Got clusters!\n")
 """
 Cluster output is:
 { cluster_id (int) : [function_id, function_id, function_id (Any)] }
 """
->>>>>>> Stashed changes
 
 # Score clusters
 clusters2scoredDataset = ScoreClusters(clusters, data_with_docs['code_reference'])
@@ -43,8 +39,6 @@ scored_dataset = clusters2scoredDataset.get_scored_dataset()
 print(scored_dataset[0])
 
 print("Scored clusters!")
-
-print(scored_dataset[0])
 
 # Train with Seq2Seq model
 model = T5Code2CodeModel("base")
