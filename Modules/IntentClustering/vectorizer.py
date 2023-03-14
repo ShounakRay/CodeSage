@@ -9,9 +9,9 @@ import numpy as np
 import json
 
 # NOTE: For ELMO, can't run this locally because of ARM issues - but need tensorflow version <= 1.9.x
-import tensorflow_hub as hub
-pkg_resources.require("tensorflow==1.9.0")
-import tensorflow as tf
+# import tensorflow_hub as hub
+# pkg_resources.require("tensorflow==1.9.0")
+# import tensorflow as tf
 
 """
 Format that Shounak needs (Joe sends this to him):
