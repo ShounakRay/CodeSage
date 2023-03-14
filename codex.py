@@ -13,6 +13,6 @@ print("Got snippets!")
 code2doc = Code2DocModule()
 
 for func in code_snippets['function']:
-  print("Purpose: " + code2doc.get_codex_doc(func, "purpose"))
+  print("Steps: " + code2doc.get_codex_doc(func, "steps"))
   # print("Purpose: " + code2doc.get_gpt_doc(func, "purpose"))
   # print("Detailed Description: " + code2doc.get_gpt_doc(func, "detailed_description"))

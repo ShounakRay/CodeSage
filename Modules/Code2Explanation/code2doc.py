@@ -5,6 +5,8 @@ import math
 from random import choice
 from string import ascii_lowercase
 import openai
+import uuid
+
 openai.api_key = ""
 
 class Code2DocModule():
@@ -51,7 +53,6 @@ class Code2DocModule():
       except:
         return ""
 
-    
     # detailed_description, purpose, runtime 
     def get_gpt_doc(self, func, type="detailed_description"):
       try: 
@@ -89,38 +90,31 @@ class Code2DocModule():
 
       return [result['summary_text'] for result in model(funcs)]
 
-    def get_docs(self, snippets, inference_batch_size = 4):
-      # train the model!
-      model = self.train_model()
-
+    def get_docs(self, snippets, C2D_LLM):
       code_reference = {}
       function_ids = []
 
       count = 0
-      print("Begin processing {} functions!".format(len(snippets["function"])))
-      documentations = []
-      for i in range(1, math.ceil(len(snippets["function"]) / inference_batch_size) + 1):
-        with torch.no_grad():
-          responses = model(snippets["function"][(i - 1) * inference_batch_size: i * inference_batch_size])
-        documentations += [response["summary_text"] for response in responses]
-        print(f"Batch {i} done!")
-      print(len(documentations))
-      print(len(snippets["function"]))
-      for i, snippet in enumerate(snippets["function"]):
-        id = snippets["id"][i]
+      for i, func in enumerate(snippets['function']):
+        id = str(uuid.uuid4());
         function_ids.append(id)
+
+        documentation = ""
+        if (C2D_LLM == 'CODETRANS'):
+          documentation = snippets['code_trans'][i]
+        elif (C2D_LLM == 'CODEX'):
+          documentation = snippets['purpose'][i]
+        elif (C2D_LLM == 'GPT'):
+          documentation = snippets['detailed_description'][i]
+
         code_reference[id] = {
-          "code": snippet,
-          "documentation": documentations[i],
-          "reputation": {
-            "num_stars": snippets["features"][i][0],
-            "num_forks": snippets["features"][i][1],
-            "num_watchers": snippets["features"][i][2],
-            "num_open_issues": snippets["features"][i][3]
-          }
+            "code": func,
+            "documentation": documentation,
+            "reputation": snippets['features'][i]
         }
         count += 1
-        print(str(count) + " functions processed.")
+
+      print(str(count) + " functions processed.")
       
       print("No. of processed functions: ", len(code_reference.keys()))
 
@@ -128,5 +122,7 @@ class Code2DocModule():
          "function_ids": function_ids,
          "code_reference": code_reference
       }
+
+      # self.write_to_file(data)
       
       return data

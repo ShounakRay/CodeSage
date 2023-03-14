@@ -10,7 +10,7 @@ import json
 from datetime import datetime
 
 GITHUB_DATASET_URI = "codeparrot/github-code"
-ANNOTATED_DATASET_URI = 'michaelnath/annotated-code-functions-base'
+ANNOTATED_DATASET_URI = 'michaelnath/annotated_github_dataset_2'
 
 class CodeSnippetDataset:
     def construct_feature_set(self, code_entry):

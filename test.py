@@ -1,4 +1,9 @@
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from datasets import load_dataset
 
-tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neox-20b")
-model = AutoModelForCausalLM.from_pretrained("EleutherAI/gpt-neox-20b")
+dataset = load_dataset("michaelnath/annotated_github_dataset_2", split='train')
+
+filtered_description = list(filter(None, dataset['detailed_description']))
+filtered_purpose = list(filter(None, dataset['purpose']))
+filtered_codetrans = list(filter(None, dataset['code_trans']))
+
+print(len(filtered_codetrans))
