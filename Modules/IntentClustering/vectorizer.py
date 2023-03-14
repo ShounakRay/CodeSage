@@ -37,21 +37,19 @@ def vectorize(data, embedder='pretrained', input='content', **kwargs):
         embeddings = _tfidf_vectorizer(raw_documents=data,
                                     input='content', max_features=None,
                                     use_idf=True, smooth_idf=True, sublinear_tf=True)
-    
-    elif embedder == 'STrans':
+    elif embedder == 'strans':
         from sentence_transformers import SentenceTransformer
         model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
         embeddings = model.encode(data)
-    
-    elif embedder == "Elmo":
-        # TODO: Testing pending on non-ARM VMachine
-        elmo = hub.Module("https://tfhub.dev/google/elmo/2", trainable=True)
-        embeddings = elmo(x.tolist(), signature="default", as_dict=True)["elmo"]
-        with tf.Session() as sess:
-            sess.run(tf.global_variables_initializer())
-            sess.run(tf.tables_initializer())
-            # return average of ELMo features
-            embeddings = sess.run(tf.reduce_mean(embeddings,1))        
+    # elif embedder == "Elmo":
+    #     # TODO: Testing pending on non-ARM VMachine
+    #     elmo = hub.Module("https://tfhub.dev/google/elmo/2", trainable=True)
+    #     embeddings = elmo(x.tolist(), signature="default", as_dict=True)["elmo"]
+    #     with tf.Session() as sess:
+    #         sess.run(tf.global_variables_initializer())
+    #         sess.run(tf.tables_initializer())
+    #         # return average of ELMo features
+    #         embeddings = sess.run(tf.reduce_mean(embeddings,1))
     else:
         raise ValueError("We don't support this vectorizer mode yet.")
     

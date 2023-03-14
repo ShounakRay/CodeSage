@@ -5,7 +5,6 @@ import math
 from random import choice
 from string import ascii_lowercase
 import openai
-import uuid
 
 openai.api_key = ""
 
@@ -96,7 +95,7 @@ class Code2DocModule():
 
       count = 0
       for i, func in enumerate(snippets['function']):
-        id = str(uuid.uuid4());
+        id = str(i);
         function_ids.append(id)
 
         documentation = ""

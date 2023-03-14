@@ -12,7 +12,7 @@ from Modules.Code2Code.models.t5_code_2_code_model import T5Code2CodeModel
 ########################################################################
 
 MAX_FUNCTION_STRING_LENGTH = 512
-N_SNIPPETS = 100
+N_SNIPPETS = 10000
 
 C2D_LLM = 'CODETRANS'
 assert C2D_LLM in  ('CODETRANS', 'CODEX', 'GPT')
@@ -57,24 +57,34 @@ assert 0.001 <= C2C_WEIGHT_DECAY <= 0.1
 # Get Dataset
 dataset = CodeSnippetDataset(github=False, languages=["Python"])
 code_snippets = dataset.get_n_snippets(N_SNIPPETS, max_length=MAX_FUNCTION_STRING_LENGTH)
+"""
+dict_keys(['function', 'repo_name', 'path', 'features', 'purpose', 'detailed_description', 'code_trans', 'id'])
+"""
 print("Got snippets!\n")
-"""
-[code_string_raw, code_string_raw]
-
-[]
-"""
 
 
 # Transforms dataset into code format
 code2doc = Code2DocModule()
 data_with_docs = code2doc.get_docs(code_snippets, C2D_LLM = C2D_LLM)
+"""
+data_with_docs = {
+ 	function_ids: [“id1”],
+ 	code_reference: {
+ 		“id1”: {
+ 			“code”: …,
+ 			“reputation”: […,…,,..,..],
+ 			“documentation”: depends on C2D_LLM(string)
 
+ 		}
+ 	}
+ }
+"""
 
 print("Got documentations!\n")
 
 # Turn dataset into clusters
 doc2clusters = IntentClustering(function_ids=data_with_docs['function_ids'], code_reference=data_with_docs['code_reference'])
-clusters = doc2clusters.core_get_clusters(embedder="STrans", method='kmeans', n_clusters=IC_KVAL, eps=0.5, min_samples=5, n_jobs=-1)
+clusters = doc2clusters.core_get_clusters(embedder="strans", method='dbscan', n_clusters=IC_KVAL, eps=0.5, min_samples=5, n_jobs=-1)
 
 print("Got clusters!\n")
 """
