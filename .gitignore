@@ -149,3 +149,4 @@ dmypy.json
 # Pyre type checker
 .pyre/
 Modules/.DS_Store
+Modules/IntentClustering/Reference/
