@@ -70,5 +70,7 @@ protobuf==3.20.3
 sacrebleu==2.3.1
 evaluate==0.4.0
 openai==0.26.5
-# Shounak
-tensorflow==1.9.0
+
+# """Shounak"""
+# tensorflow==1.9.0
+# multiprocess==0.70.14
