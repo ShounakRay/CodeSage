@@ -28,10 +28,10 @@ class ScoreClusters():
 
     if (SC_METHOD == 'SHARED'): 
       self.thresholding_function = shared
-      self.thresholding_params = (SC_BOUNDARY)
+      self.thresholding_params = [SC_BOUNDARY]
     elif (SC_METHOD == 'PERCENTILE'):
       self.thresholding_function = percentile
-      self.thresholding_params = (SC_LOWPERC, SC_HIGHPERC)
+      self.thresholding_params = [SC_LOWPERC, SC_HIGHPERC]
   
   def write_to_file(self, df):
      df.to_csv("scored_dataset.csv")
@@ -44,7 +44,7 @@ class ScoreClusters():
       intents = self.clusters[intent_category]
       if len(intents) == 1: continue
       sorted_intents = sorted(intents, reverse=True, key = lambda intent: self.scoring_function(self.code_reference[intent]))
-      self.scored_clusters[intent_category] = self.thresholding_function(sorted_intents, thresholding_params)
+      self.scored_clusters[intent_category] = self.thresholding_function(sorted_intents, self.thresholding_params)
       
     for intent in self.scored_clusters.keys():
         code_ids = self.scored_clusters[intent]
@@ -64,7 +64,7 @@ class ScoreClusters():
         dicty["target"].append(good_code)
 
     df = pd.DataFrame.from_dict(dicty)
-    self.write_to_file(df)
+    # self.write_to_file(df)
 
     hf_ds = Dataset.from_pandas(df)
     return hf_ds

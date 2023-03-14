@@ -1,4 +1,5 @@
 from Modules.Code2Code.models.base_model import BaseCode2CodeModel
+import multiprocessing
 from datasets import Dataset
 from transformers import RobertaTokenizer, pipeline, T5ForConditionalGeneration, Seq2SeqTrainingArguments, Seq2SeqTrainer, DataCollatorForSeq2Seq
 import evaluate
@@ -72,7 +73,8 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         C2C_WEIGHT_DECAY=0.01,
         C2C_EPOCH_N=2,
     ):
-        dataset = dataset.map(self.preprocess_function, batched=True, num_proc=4).train_test_split(test_size=C2C_TEST_SIZE)
+        print("C2C (Preprocessing): Creating Bad Code -> Good Code Dataset")
+        dataset = dataset.map(self.preprocess_function, batched=True, num_proc=multiprocessing.cpu_count()).train_test_split(test_size=C2C_TEST_SIZE)
         train_dataset = dataset["train"]
         eval_dataset = dataset["test"]
         data_collator = DataCollatorForSeq2Seq(tokenizer=self.tokenizer, model=self.pretrained_model)
@@ -100,9 +102,10 @@ class T5Code2CodeModel(BaseCode2CodeModel):
             data_collator=data_collator,
             compute_metrics=self.compute_metrics,
         )
-        
+        print("C2C (Finetuning): Finetuning Model") 
         trainer.train()
         self.finetuned_model_name = output_model_dir
+        print("C2C (Finetuning): Finetuning Finished") 
         try:
             self.pretrained_model.push_to_hub(self.finetuned_model_name)
         except:

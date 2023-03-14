@@ -7,111 +7,111 @@ from Modules.IntentClustering.data2clusters import IntentClustering
 from Modules.ScoreClusters.clusters2score import ScoreClusters
 from Modules.Code2Code.models.t5_code_2_code_model import T5Code2CodeModel
 
-########################################################################
-######################### HYPERPARAMETERS ##############################
-########################################################################
+# ########################################################################
+# ######################### HYPERPARAMETERS ##############################
+# ########################################################################
 
-MAX_FUNCTION_STRING_LENGTH = 512
-N_SNIPPETS = 10000
+# MAX_FUNCTION_STRING_LENGTH = 512
+# N_SNIPPETS = 10000
 
-C2D_LLM = 'CODETRANS'
-assert C2D_LLM in  ('CODETRANS', 'CODEX', 'GPT')
+# C2D_LLM = 'CODETRANS'
+# assert C2D_LLM in  ('CODETRANS', 'CODEX', 'GPT')
 
-# IC_ALGO = 'KMEANS'
-# assert IC_ALGO in ("KMEANS/SOM, KMEANS, DBSCSAN")
-# IC_KVAL = 10
-# assert type(IC_KVAL) == np.number
+# # IC_ALGO = 'KMEANS'
+# # assert IC_ALGO in ("KMEANS/SOM, KMEANS, DBSCSAN")
+# # IC_KVAL = 10
+# # assert type(IC_KVAL) == np.number
 
-SC_LOWPERC = 0.1
-assert 0.01 <= SC_LOWPERC <= 0.99
-SC_HIGHPERC = 0.9
-assert 0.01 <= SC_HIGHPERC <= 0.99
-SC_BOUNDARY = 50
-print(f"CUSTOM NOTE: Ensure that `SC_BOUNDARY` is set to - say - \
-      the overall median of scores across all clusters.\n\n")
-SC_METHOD = 'PERCENTILE'
-assert SC_METHOD in ('PERCENTILE', 'SHARED')
+# SC_LOWPERC = 0.1
+# assert 0.01 <= SC_LOWPERC <= 0.99
+# SC_HIGHPERC = 0.9
+# assert 0.01 <= SC_HIGHPERC <= 0.99
+# SC_BOUNDARY = 50
+# print(f"CUSTOM NOTE: Ensure that `SC_BOUNDARY` is set to - say - \
+#       the overall median of scores across all clusters.\n\n")
+# SC_METHOD = 'PERCENTILE'
+# assert SC_METHOD in ('PERCENTILE', 'SHARED')
 
-C2C_LLM = 'CODE-T5'
-assert C2C_LLM in ('CODE-T5', 'SOMETHING_ELSE')
+# C2C_LLM = 'CODE-T5'
+# assert C2C_LLM in ('CODE-T5', 'SOMETHING_ELSE')
 
-C2C_EVAL_METRIC = "bleu"
-assert C2C_EVAL_METRIC in ('bleu', 'chrf')
+# C2C_EVAL_METRIC = "bleu"
+# assert C2C_EVAL_METRIC in ('bleu', 'chrf')
 
-C2C_TEST_SIZE = 0.2
-assert 0.01 <= C2C_TEST_SIZE <= 0.99
+# C2C_TEST_SIZE = 0.2
+# assert 0.01 <= C2C_TEST_SIZE <= 0.99
 
-C2C_LR = 0.3
-assert 0.05 <= C2C_LR <= 0.95
-C2C_EPOCH_N = 2
-assert 1 <= C2C_EPOCH_N <= 5
-C2C_BATCH_SIZE = 16
-assert 1 <= C2C_BATCH_SIZE <= 64
-C2C_WEIGHT_DECAY = 0.01
-assert 0.001 <= C2C_WEIGHT_DECAY <= 0.1
+# C2C_LR = 0.3
+# assert 0.05 <= C2C_LR <= 0.95
+# C2C_EPOCH_N = 2
+# assert 1 <= C2C_EPOCH_N <= 5
+# C2C_BATCH_SIZE = 16
+# assert 1 <= C2C_BATCH_SIZE <= 64
+# C2C_WEIGHT_DECAY = 0.01
+# assert 0.001 <= C2C_WEIGHT_DECAY <= 0.1
 
-########################################################################
-############################ PIPELINE ##################################
-########################################################################
+# ########################################################################
+# ############################ PIPELINE ##################################
+# ########################################################################
 
-# Get Dataset
-dataset = CodeSnippetDataset(github=False, languages=["Python"])
-code_snippets = dataset.get_n_snippets(N_SNIPPETS, max_length=MAX_FUNCTION_STRING_LENGTH)
-"""
-dict_keys(['function', 'repo_name', 'path', 'features', 'purpose', 'detailed_description', 'code_trans', 'id'])
-"""
-print("Got snippets!\n")
+# # Get Dataset
+# dataset = CodeSnippetDataset(github=False, languages=["Python"])
+# code_snippets = dataset.get_n_snippets(N_SNIPPETS, max_length=MAX_FUNCTION_STRING_LENGTH)
+# """
+# dict_keys(['function', 'repo_name', 'path', 'features', 'purpose', 'detailed_description', 'code_trans', 'id'])
+# """
+# print("Got snippets!\n")
 
 
-# Transforms dataset into code format
-code2doc = Code2DocModule()
-data_with_docs = code2doc.get_docs(code_snippets, C2D_LLM = C2D_LLM)
-"""
-data_with_docs = {
- 	function_ids: [“id1”],
- 	code_reference: {
- 		“id1”: {
- 			“code”: …,
- 			“reputation”: […,…,,..,..],
- 			“documentation”: depends on C2D_LLM(string)
+# # Transforms dataset into code format
+# code2doc = Code2DocModule()
+# data_with_docs = code2doc.get_docs(code_snippets, C2D_LLM = C2D_LLM)
+# """
+# data_with_docs = {
+#  	function_ids: [“id1”],
+#  	code_reference: {
+#  		“id1”: {
+#  			“code”: …,
+#  			“reputation”: […,…,,..,..],
+#  			“documentation”: depends on C2D_LLM(string)
 
- 		}
- 	}
- }
-"""
+#  		}
+#  	}
+#  }
+# """
 
-print("Got documentations!\n")
+# print("Got documentations!\n")
 
-# Turn dataset into clusters
-doc2clusters = IntentClustering(function_ids=data_with_docs['function_ids'], code_reference=data_with_docs['code_reference'])
-clusters = doc2clusters.core_get_clusters(embedder="strans", method='dbscan', n_clusters=IC_KVAL, eps=0.5, min_samples=5, n_jobs=-1)
+# # Turn dataset into clusters
+# doc2clusters = IntentClustering(function_ids=data_with_docs['function_ids'], code_reference=data_with_docs['code_reference'])
+# clusters = doc2clusters.core_get_clusters(embedder="strans", method='dbscan', n_clusters=IC_KVAL, eps=0.5, min_samples=5, n_jobs=-1)
 
-print("Got clusters!\n")
-"""
-Cluster output is:
-{ cluster_id (int) : [function_id, function_id, function_id (Any)] }
-"""
+# print("Got clusters!\n")
+# """
+# Cluster output is:
+# { cluster_id (int) : [function_id, function_id, function_id (Any)] }
+# """
 
-# Score clusters
-clusters2scoredDataset = ScoreClusters(clusters, data_with_docs['code_reference'],
-                                       SC_METHOD=SC_METHOD,
-                                       SC_LOWPERC=SC_LOWPERC if SC_METHOD == 'PERCENTILE' else None,
-                                       SC_HIGHPERC=SC_HIGHPERC if SC_METHOD == 'PERCENTILE' else None,
-                                       SC_BOUNDARY=SC_BOUNDARY if SC_METHOD == 'SHARED' else None)
-scored_dataset = clusters2scoredDataset.get_scored_dataset()
-print("Scored clusters!\n")
+# # Score clusters
+# clusters2scoredDataset = ScoreClusters(clusters, data_with_docs['code_reference'],
+#                                        SC_METHOD=SC_METHOD,
+#                                        SC_LOWPERC=SC_LOWPERC if SC_METHOD == 'PERCENTILE' else None,
+#                                        SC_HIGHPERC=SC_HIGHPERC if SC_METHOD == 'PERCENTILE' else None,
+#                                        SC_BOUNDARY=SC_BOUNDARY if SC_METHOD == 'SHARED' else None)
+# scored_dataset = clusters2scoredDataset.get_scored_dataset()
+# print("Scored clusters!\n")
 
-MODEL_OUTPUT_DIR = "c2c_model_with_chrf_and_nonzero_reps"
-# Train with Seq2Seq model
-model = T5Code2CodeModel("base", C2C_EVAL_METRIC=C2C_EVAL_METRIC)
-model.train(scored_dataset, 
-            MODEL_OUTPUT_DIR, 
-            C2C_TEST_SIZE=C2C_TEST_SIZE, 
-            C2C_LR=C2C_LR, 
-            C2C_BATCH_SIZE=C2C_BATCH_SIZE, 
-            C2C_WEIGHT_DECAY=C2C_WEIGHT_DECAY, 
-            C2C_EPOCH_N=C2C_EPOCH_N
-            )
+# MODEL_OUTPUT_DIR = "c2c_model_with_chrf_and_nonzero_reps"
+# # Train with Seq2Seq model
+# model = T5Code2CodeModel("base", C2C_EVAL_METRIC=C2C_EVAL_METRIC)
+# model.train(scored_dataset, 
+#             MODEL_OUTPUT_DIR, 
+#             C2C_TEST_SIZE=C2C_TEST_SIZE, 
+#             C2C_LR=C2C_LR, 
+#             C2C_BATCH_SIZE=C2C_BATCH_SIZE, 
+#             C2C_WEIGHT_DECAY=C2C_WEIGHT_DECAY, 
+#             C2C_EPOCH_N=C2C_EPOCH_N
+#             )
 # print("Trained model!")
 
 # # Perform inference
@@ -138,7 +138,7 @@ def run_end_to_end_with_parameters(
       C2C_BATCH_SIZE,
       C2C_WEIGHT_DECAY,
 ):
-      assert C2D_LLM in  ('CODETRANS', 'CODEX', 'GPT')
+      assert C2D_LLM in  ('C`ODETRANS', 'CODEX', 'GPT')
       assert 1 <= SC_LOWPERC <= 99
       assert 1 <= SC_HIGHPERC <= 99
       assert 0 <= SC_BOUNDARY <= 100
@@ -149,7 +149,7 @@ def run_end_to_end_with_parameters(
       assert C2C_LLM in ('CODE-T5', 'SOMETHING_ELSE')
       assert C2C_EVAL_METRIC in ('bleu', 'chrf')
       assert 0.01 <= C2C_TEST_SIZE <= 0.99
-      assert 0.05 <= C2C_LR <= 0.95
+      assert 2e-5 <= C2C_LR <= 0.01
       assert 1 <= C2C_EPOCH_N <= 5
       assert 1 <= C2C_BATCH_SIZE <= 64
       assert 0.01 <= C2C_WEIGHT_DECAY <= 0.1 
@@ -165,7 +165,9 @@ def run_end_to_end_with_parameters(
                                        SC_HIGHPERC=SC_HIGHPERC if SC_METHOD == 'PERCENTILE' else None,
                                        SC_BOUNDARY=SC_BOUNDARY if SC_METHOD == 'SHARED' else None)
       
+      scored_dataset = clusters2scoredDataset.get_scored_dataset()
       model = T5Code2CodeModel("base", C2C_EVAL_METRIC=C2C_EVAL_METRIC)
+      MODEL_OUTPUT_DIR = "C2C_Model_03_14_2023"
       model.train(scored_dataset, 
             MODEL_OUTPUT_DIR, 
             C2C_TEST_SIZE=C2C_TEST_SIZE, 
@@ -176,37 +178,37 @@ def run_end_to_end_with_parameters(
       ) 
        
 # from sklearn.datasets import load_iris
-from sklearn.model_selection import train_test_split
-from sklearn.svm import SVC
-from sklearn.model_selection import GridSearchCV
+# from sklearn.model_selection import train_test_split
+# from sklearn.svm import SVC
+# from sklearn.model_selection import GridSearchCV
 
-# Load the iris dataset
-iris = load_iris()
+# # Load the iris dataset
+# iris = load_iris()
 
-# Split the data into training and test sets
-X_train, X_test, y_train, y_test = train_test_split(iris.data, iris.target, test_size=0.2, random_state=42)
+# # Split the data into training and test sets
+# X_train, X_test, y_train, y_test = train_test_split(iris.data, iris.target, test_size=0.2, random_state=42)
 
-# Define the hyperparameters to tune
-param_grid = {'C': [0.1, 1, 10], 'kernel': ['linear', 'rbf'], 'gamma': ['scale', 'auto']}
+# # Define the hyperparameters to tune
+# param_grid = {'C': [0.1, 1, 10], 'kernel': ['linear', 'rbf'], 'gamma': ['scale', 'auto']}
 
-# Create the SVM classifier object
-svm_clf = SVC()
+# # Create the SVM classifier object
+# svm_clf = SVC()
 
-# Create the GridSearchCV object with 5-fold cross-validation
-grid_search = GridSearchCV(svm_clf, param_grid, cv=5)
+# # Create the GridSearchCV object with 5-fold cross-validation
+# grid_search = GridSearchCV(svm_clf, param_grid, cv=5)
 
-# Fit the GridSearchCV object to the training data
-grid_search.fit(X_train, y_train)
+# # Fit the GridSearchCV object to the training data
+# grid_search.fit(X_train, y_train)
 
-# Print the best hyperparameters and the corresponding accuracy score
-print("Best hyperparameters: ", grid_search.best_params_)
-print("Best accuracy score: ", grid_search.best_score_)
+# # Print the best hyperparameters and the corresponding accuracy score
+# print("Best hyperparameters: ", grid_search.best_params_)
+# print("Best accuracy score: ", grid_search.best_score_)
 
 
 def simulate():
       C2D_LLMS = ['CODETRANS', 'CODEX', 'GPT']
       SC_LOWPERCS = np.linspace(10, 49, 6)
-      SC_HIGHPERCS = 1 - SC_LOWPERC
+      SC_HIGHPERCS = 1 - SC_LOWPERCS
       SC_BOUNDARIES = np.linspace(1, 100, 5)
       IC_METHODS = ["kmeans", "dbscan"]
       IC_EMBEDDERS = ["tfidf", "STrans", "Elmo"]
@@ -221,7 +223,7 @@ def simulate():
 
       
       run_end_to_end_with_parameters(
-            FUNCTIONS_DATASET_URI="michaelnath/annotated_github_dataset_2"
+            FUNCTIONS_DATASET_URI="michaelnath/annotated_github_dataset_2",
             MAX_FUNCTION_STRING_LENGTH=512,
             C2D_LLM = "GPT",
             IC_METHOD="kmeans",
@@ -240,3 +242,6 @@ def simulate():
             C2C_WEIGHT_DECAY=0.01, 
       )
       
+
+if __name__ == "__main__":
+      simulate()
