@@ -22,7 +22,7 @@ def construct_feature_set(code_entry):
     user_repo_name = code_entry.split('/')
     owner = user_repo_name[0]
     repo = "".join(user_repo_name[1:])
-    header = {"Authorization": 'token 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'}
+    header = {"Authorization": 'token'}
     repo_response = requests.get(f"https://api.github.com/repos/{owner}/{repo}", headers=header)
     content = json.loads(repo_response.text)
     features["num_stars"] = content.get("stargazers_count", 0)

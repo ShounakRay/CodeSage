@@ -91,3 +91,70 @@ class ScoreClusters():
 
     hf_ds = Dataset.from_pandas(df)
     return hf_ds
+
+# code_reference = {
+#   "1": {
+#     "code": "def has_size(self): return self.has_size_",
+#     "documentation": "True if has size False otherwise",
+#     "reputation": [1000,10,10,10]
+#   },
+#   "2": {
+#     "code": "def set_max(self, x):\n    self.has_max_ = 1\n    self.max_ = x",
+#     "documentation": "Set maximum value",
+#     "reputation": [10,10,10,10]
+#   },
+#   "3": {
+#     "code": "def has_max(self): return self.has_max_",
+#     "documentation": "in_range",
+#     "reputation": [10,10,10,10]
+#   },
+#   "4": {
+#     "code": "def reserve_list(self): return self.reserve_",
+#     "documentation": "list( )",
+#     "reputation": [10,10,10,10]
+#   },
+#   "5": {
+#     "code": "def mutable_reserve(self, i):\n    return self.reserve_[i]",
+#     "documentation": "mutable reserve function",
+#     "reputation": [10,10,10,10]
+#   },
+#   "6": {
+#     "code": "def clear_reserve(self):\n    self.reserve_ = []",
+#     "documentation": "Clear reserve array .",
+#     "reputation": [10,10,10,10]
+#   },
+#   "7": {
+#     "code": "def set_trusted(self, x):\n    self.has_trusted_ = 1\n    self.trusted_ = x",
+#     "documentation": "Set the trusted value for this message .",
+#     "reputation": [10,10,10,10]
+#   },
+#   "8": {
+#     "code": "def has_trusted(self): return self.has_trusted_",
+#     "documentation": "data(self",
+#     "reputation": [10,10,10,10]
+#   },
+#   "9": {
+#     "code": "def Equals(self, x):\n    if x is self: return 1\n    if self.has_header_ != x.has_header_: return 0\n    if self.has_header_ and self.header_ != x.header_: return 0\n    if self.has_model_key_ != x.has_model_key_: return 0\n    if self.has_model_key_ and self.model_key_ != x.model_key_: return 0\n    if self.has_size_ != x.has_size_: return 0\n    if self.has_size_ and self.size_ != x.size_: return 0\n    if self.has_max_ != x.has_max_: return 0\n    if self.has_max_ and self.max_ != x.max_: return 0\n    if len(self.reserve_) != len(x.reserve_): return 0\n    for e1, e2 in zip(self.reserve_, x.reserve_):\n      if e1 != e2: return 0\n    if self.has_trusted_ != x.has_trusted_: return 0\n    if self.has_trusted_ and self.trusted_ != x.trusted_: return 0\n    return 1",
+#     "documentation": "Compare two instance objects for equality",
+#     "reputation": [10,10,10,10]
+#   },
+# }
+  
+# clusters = {
+#   "1": [],
+#   "2": ["6", "7", "8", "9", "4", "1"],
+# }
+# if __name__ == '__main__':
+
+#   scored_clusters = {}
+#   for intent_category in clusters:
+#     intents = clusters[intent_category]
+#     if len(intents) == 1: continue
+#     sorted_intents = sorted(intents, reverse=True, key = lambda intent: compute_quadratic_reputation_score(code_reference[intent]))
+#     response = percentile(compute_quadratic_reputation_score, code_reference, sorted_intents, [90, 90])
+#     if response[0] == [] or response[1] == []:
+#         continue
+#     scored_clusters[intent_category] = response
+
+#   print(scored_clusters)
+    

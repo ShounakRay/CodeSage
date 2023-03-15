@@ -1,9 +1,13 @@
 from Modules.Code2Code.models.base_model import BaseCode2CodeModel
 import multiprocessing
+import json
 from datasets import Dataset
 from transformers import RobertaTokenizer, pipeline, T5ForConditionalGeneration, Seq2SeqTrainingArguments, Seq2SeqTrainer, DataCollatorForSeq2Seq
 import evaluate
 import numpy as np
+import shutil
+import os
+
 
 class T5Code2CodeModel(BaseCode2CodeModel):
     pretrained_model_name = "Salesforce/codet5-"
@@ -104,12 +108,25 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         )
         print("C2C (Finetuning): Finetuning Model") 
         trainer.train()
+        print(trainer.evaluate())
+        with open(f"results/{output_model_dir}.json", "w+") as f:
+            f.write(json.dumps(trainer.evaluate(), indent=2))
         self.finetuned_model_name = output_model_dir
         print("C2C (Finetuning): Finetuning Finished") 
         try:
             self.pretrained_model.push_to_hub(self.finetuned_model_name)
         except:
             print("Error pushing automatically to hub. Push manually via Python REPL.")
+
+        if os.path.exists(output_model_dir):
+            try:
+                shutil.rmtree(output_model_dir)
+                print(f"Directory '{output_model_dir}' has been deleted.")
+            except OSError as e:
+                print(f"Error deleting directory '{output_model_dir}': {e}")
+        else:
+            print(f"Directory '{output_model_dir}' does not exist.")
+        
     
     def __call__(self, input_bad_code: str):
         text = self.prefix + input_bad_code
