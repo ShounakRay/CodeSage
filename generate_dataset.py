@@ -15,7 +15,7 @@ from pprint import pprint
 from datasets import Dataset
 
 GITHUB_DATASET_URI = "codeparrot/github-code"
-ANNOTATED_DATASET_URI = 'michaelnath/annotated-code-functions-base'
+ANNOTATED_DATASET_URI = 'michaelnath/functions_annotated_with_intents'
 repo_to_features_mapping = dict()
 def construct_feature_set(code_entry):
     features = dict();
@@ -113,5 +113,5 @@ ds = ds.add_column("detailed_description", [code2doc.get_gpt_doc(func, "detailed
 ds = ds.add_column("code_trans", code2doc.get_code_trans_docs(ds['function']))
 
 # Push to hugging face!
-DATASET_NAME = "annotated_github_dataset_2"
+DATASET_NAME = "functions_annotated_with_intents"
 ds.push_to_hub(DATASET_NAME)  

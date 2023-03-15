@@ -13,6 +13,7 @@ test/
 Modules/IntentClustering/Visualizations/
 Modules/IntentClustering/pictures
 Modules/IntentClustering/_tempData/
+Modules/IntentClustering/storeData/
 
 ################################################################################
 ################################################################################
@@ -148,3 +149,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+Modules/.DS_Store
+Modules/IntentClustering/Reference/

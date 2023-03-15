@@ -1,4 +1,5 @@
 from Modules.Code2Code.models.base_model import BaseCode2CodeModel
+import multiprocessing
 from datasets import Dataset
 from transformers import RobertaTokenizer, pipeline, T5ForConditionalGeneration, Seq2SeqTrainingArguments, Seq2SeqTrainer, DataCollatorForSeq2Seq
 import evaluate
@@ -10,8 +11,7 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         self, 
         model_size: str, 
         max_length=512,     
-        truncation=True,
-            ):
+        truncation=True):
         """Init salesforce codet5 model of a given size
 
         Args:
@@ -32,16 +32,14 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         
         inputs = [self.prefix + example for example in examples["input"]]
         outputs = [example for example in examples["target"]]
-        # max_cluster_amount = 50
-        # tokenized_input_references_pairs = {"input_ids": [], "labels": []}
-        # for i in range(len(inputs)):
-        #     references = outputs[i] + max(0, max_cluster_amount - len(outputs[i])) * ["BLEH"]
-        #     encodings_i = self.tokenizer(inputs[i], text_target=references, max_length=512, truncation=True)
-        #     tokenized_input_references_pairs["input_ids"].append(encodings_i["input_ids"])
-        #     tokenized_input_references_pairs["labels"].append(encodings_i["labels"])
-        # print(tokenized_input_references_pairs)
-        tokenized_input_references_pairs = self.tokenizer(inputs, text_target=outputs, max_length=self.max_length, truncation=True)
-        return tokenized_input_references_pairs
+        model_inputs = self.tokenizer(inputs, max_length=self.max_length, padding="max_length", truncation=True)
+        labels = self.tokenizer(outputs, max_length=self.max_length, padding="max_length", truncation=True).input_ids
+        labels_with_ignore_index = []
+        for labels_example in labels:
+            labels_example = [label if label != 0 else -100 for label in labels_example]
+            labels_with_ignore_index.append(labels_example)
+        model_inputs["labels"] = labels_with_ignore_index
+        return model_inputs
 
     def postprocess_text(self, preds, labels):
         preds = [pred.strip() for pred in preds]
@@ -56,27 +54,27 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         labels = np.where(labels != -100, labels, self.tokenizer.pad_token_id)
         decoded_labels = self.tokenizer.batch_decode(labels, skip_special_tokens=True)
         decoded_preds, decoded_labels = self.postprocess_text(decoded_preds, decoded_labels)
-        chrf_result = self.chrf.compute(predictions=decoded_preds, references=decoded_labels)
-        codebleu_result = self.chrf.compute(predictions=decoded_preds, references=decoded_labels)
-        bleu_result = self.chrf.compute(predictions=decoded_preds, references=decoded_labels)
+        chrf_result = self.chrf_metric.compute(predictions=decoded_preds, references=decoded_labels)
+        codebleu_result = self.codebleu_metric.compute(predictions=decoded_preds, references=decoded_labels)
+        bleu_result = self.bleu_metric.compute(predictions=decoded_preds, references=decoded_labels)
         result = {"chrf": chrf_result["score"], "codebleu": codebleu_result, "bleu": bleu_result["score"]}
+
         prediction_lens = [np.count_nonzero(pred != self.tokenizer.pad_token_id) for pred in preds]
         result["gen_len"] = np.mean(prediction_lens)
-        result = {k: round(v, 4) for k, v in result.items()}
         return result
     
     def train(
         self,
         dataset: Dataset,
         output_model_dir: str,
-        test_size=0.2,
-        learning_rate=2e-5,
-        per_device_train_batch_size=4,
-        per_device_eval_batch_size=4,
-        weight_decay=0.01,
-        num_train_epochs=2,
+        C2C_TEST_SIZE=0.2,
+        C2C_LR=2e-5,
+        C2C_BATCH_SIZE=4,
+        C2C_WEIGHT_DECAY=0.01,
+        C2C_EPOCH_N=2,
     ):
-        dataset = dataset.map(self.preprocess_function, batched=True, num_proc=4).train_test_split(test_size=test_size)
+        print("C2C (Preprocessing): Creating Bad Code -> Good Code Dataset")
+        dataset = dataset.map(self.preprocess_function, batched=True, num_proc=3).train_test_split(test_size=C2C_TEST_SIZE)
         train_dataset = dataset["train"]
         eval_dataset = dataset["test"]
         data_collator = DataCollatorForSeq2Seq(tokenizer=self.tokenizer, model=self.pretrained_model)
@@ -84,12 +82,12 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         training_args = Seq2SeqTrainingArguments(
             output_dir=output_model_dir,
             evaluation_strategy="epoch",
-            learning_rate=learning_rate,
-            per_device_train_batch_size=per_device_train_batch_size,
-            per_device_eval_batch_size=per_device_eval_batch_size,
-            weight_decay=weight_decay,
-            save_total_limit=num_train_epochs + 1,
-            num_train_epochs=num_train_epochs,
+            learning_rate=C2C_LR,
+            per_device_train_batch_size=C2C_BATCH_SIZE,
+            per_device_eval_batch_size=C2C_BATCH_SIZE,
+            weight_decay=C2C_WEIGHT_DECAY,
+            save_total_limit=C2C_EPOCH_N + 1,
+            num_train_epochs=C2C_EPOCH_N,
             predict_with_generate=True,
             fp16=True,
             push_to_hub=False,
@@ -104,9 +102,10 @@ class T5Code2CodeModel(BaseCode2CodeModel):
             data_collator=data_collator,
             compute_metrics=self.compute_metrics,
         )
-        
+        print("C2C (Finetuning): Finetuning Model") 
         trainer.train()
         self.finetuned_model_name = output_model_dir
+        print("C2C (Finetuning): Finetuning Finished") 
         try:
             self.pretrained_model.push_to_hub(self.finetuned_model_name)
         except:
