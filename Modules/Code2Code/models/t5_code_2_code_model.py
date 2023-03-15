@@ -113,10 +113,10 @@ class T5Code2CodeModel(BaseCode2CodeModel):
             f.write(json.dumps(trainer.evaluate(), indent=2))
         self.finetuned_model_name = output_model_dir
         print("C2C (Finetuning): Finetuning Finished") 
-        try:
-            self.pretrained_model.push_to_hub(self.finetuned_model_name)
-        except:
-            print("Error pushing automatically to hub. Push manually via Python REPL.")
+        # try:
+        #     self.pretrained_model.push_to_hub(self.finetuned_model_name)
+        # except:
+        #     print("Error pushing automatically to hub. Push manually via Python REPL.")
 
         if os.path.exists(output_model_dir):
             try:

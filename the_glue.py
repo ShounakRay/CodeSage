@@ -56,10 +56,10 @@ def run_end_to_end_with_parameters(
                                        SC_HIGHPERC=100-SC_LOWPERC if SC_METHOD == 'PERCENTILE' else None,
                                        SC_BOUNDARY=SC_BOUNDARY if SC_METHOD == 'SHARED' else None)
       scored_dataset = clusters2scoredDataset.get_scored_dataset()
-      try:
-            scored_dataset.push_to_hub("bad_code_to_good_code_dataset_" + C2C_MODEL_OUTPUT_DIR);
-      except Exception as e:
-            print(f"Pushing dataset failure due to {e}")
+      # try:
+      #       scored_dataset.push_to_hub(C2C_MODEL_OUTPUT_DIR);
+      # except Exception as e:
+      #       print(f"Pushing dataset failure due to {e}")
       model = T5Code2CodeModel("base")
       model.train(scored_dataset, 
             C2C_MODEL_OUTPUT_DIR, 
