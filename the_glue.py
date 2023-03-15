@@ -213,6 +213,7 @@ def simulate():
       SC_BOUNDARIES = np.linspace(1, 100, 5)
       IC_METHODS = ["kmeans", "dbscan"]
       IC_EMBEDDERS = ["tfidf", "STrans", "Elmo"]
+      SC_SCORING = ["LINEAR", "QUADRATIC"]
       SC_METHODS = ["PERCENTILE", "SHARED"]
       IC_KVALS = np.linspace(2, 20, 5)
       C2C_LLMS = ['CODE-T5']
