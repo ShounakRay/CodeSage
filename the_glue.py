@@ -58,7 +58,7 @@ def run_end_to_end_with_parameters(
                                        SC_HIGHPERC=100-SC_LOWPERC if SC_METHOD == 'PERCENTILE' else None,
                                        SC_BOUNDARY=SC_BOUNDARY if SC_METHOD == 'SHARED' else None)
       scored_dataset = clusters2scoredDataset.get_scored_dataset()
-      scored_dataset.push_to_hub("bad_code_to_good_code_dataset");
+      scored_dataset.push_to_hub("bad_code_to_good_code_dataset_" + C2C_MODEL_OUTPUT_DIR);
       model = T5Code2CodeModel("base")
       model.train(scored_dataset, 
             C2C_MODEL_OUTPUT_DIR, 
@@ -78,15 +78,13 @@ def simulate():
       IC_METHODS=["kmeans", "dbscan"]
       IC_EMBEDDERS=["STrans"]
       SC_SCORING=["LINEAR", "QUADRATIC"]
-      IC_KVALS=[3]
+      IC_KVALS=[70, 120, 180]
       C2C_LLMS=['CODE-T5']
       C2C_TEST_SIZE=[0.3]
       C2C_BATCH_SIZES=[16] 
       C2C_WEIGHT_DECAYS=[0.01]
       C2C_EPOCH_NS=[1]
       C2C_LR=[0.01]
-      
-      
 
       shared_combination = itertools.product(
             C2D_LLMS,
