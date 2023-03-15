@@ -5,7 +5,7 @@ import math
 from random import choice
 from string import ascii_lowercase
 import openai
-openai.api_key = ""
+openai.api_key = "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"
 
 class Code2DocModule():
 
@@ -34,6 +34,7 @@ class Code2DocModule():
                       presence_penalty=0.0,
                       stop=["."]
                     )
+          print("CODEX:", response.choices[0].text.strip())
           return response.choices[0].text.strip()
         elif (type == "runtime"):
           prompt = "# Python 3\n" + func + '"""\nThe runtime of the above function is'
@@ -66,6 +67,7 @@ class Code2DocModule():
                       frequency_penalty=0.0,
                       presence_penalty=0.0,
                     )
+          print("GPT:", response.choices[0].text.strip())
           return response.choices[0].text.strip()
         elif (type == "purpose"):
           prompt = func + "\nThe purpose of this function is"
@@ -86,7 +88,7 @@ class Code2DocModule():
     def get_code_trans_docs(self, funcs):
       # train the model!
       model = self.train_model()
-
+      print("GENERATING CODE TRANS...")
       return [result['summary_text'] for result in model(funcs)]
 
     def get_docs(self, snippets, inference_batch_size = 4):

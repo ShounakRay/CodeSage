@@ -11,7 +11,6 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         model_size: str, 
         max_length=512,     
         truncation=True,
-        metric="chrf" 
             ):
         """Init salesforce codet5 model of a given size
 
@@ -20,7 +19,9 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         """
         super().__init__()
         self.pretrained_model_name += model_size
-        self.metric = evaluate.load(metric)
+        self.chrf_metric = evaluate.load('chrf')
+        self.codebleu_metric = evaluate.load('dvitel/codebleu')
+        self.bleu_metric = evaluate.load('sacrebleu')
         self.pretrained_model = T5ForConditionalGeneration.from_pretrained(self.pretrained_model_name)
         self.max_length = max_length
         self.truncation = truncation
@@ -55,8 +56,10 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         labels = np.where(labels != -100, labels, self.tokenizer.pad_token_id)
         decoded_labels = self.tokenizer.batch_decode(labels, skip_special_tokens=True)
         decoded_preds, decoded_labels = self.postprocess_text(decoded_preds, decoded_labels)
-        result = self.metric.compute(predictions=decoded_preds, references=decoded_labels)
-        result = {"chrf": result["score"]}
+        chrf_result = self.chrf.compute(predictions=decoded_preds, references=decoded_labels)
+        codebleu_result = self.chrf.compute(predictions=decoded_preds, references=decoded_labels)
+        bleu_result = self.chrf.compute(predictions=decoded_preds, references=decoded_labels)
+        result = {"chrf": chrf_result["score"], "codebleu": codebleu_result, "bleu": bleu_result["score"]}
         prediction_lens = [np.count_nonzero(pred != self.tokenizer.pad_token_id) for pred in preds]
         result["gen_len"] = np.mean(prediction_lens)
         result = {k: round(v, 4) for k, v in result.items()}

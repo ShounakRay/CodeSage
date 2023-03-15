@@ -22,9 +22,8 @@ def construct_feature_set(code_entry):
     user_repo_name = code_entry.split('/')
     owner = user_repo_name[0]
     repo = "".join(user_repo_name[1:])
-    header = {"Authorization": 'token '}
+    header = {"Authorization": 'token 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'}
     repo_response = requests.get(f"https://api.github.com/repos/{owner}/{repo}", headers=header)
-    print(repo_response.headers)
     content = json.loads(repo_response.text)
     features["num_stars"] = content.get("stargazers_count", 0)
     features["num_forks"] = content.get("forks_count", 0)
@@ -76,7 +75,7 @@ ds = load_dataset("codeparrot/github-code", split="train", streaming=True, langu
 BATCH_SIZE = 2
 ds=ds.map(augment_code_entry, batched=True, batch_size=BATCH_SIZE, remove_columns=["code", "license", "size", "language"])
 
-dataloader = DataLoader(ds, batch_size=2, num_workers=2)
+dataloader = DataLoader(ds, batch_size=2, num_workers=1)
 
 dicty= dict()
 dicty["function"] = []
@@ -96,6 +95,7 @@ for _, batch in enumerate(dataloader):
         dicty["repo_name"] += [batch["repo_name"][index]] * len(actual_functions)
         dicty["path"] += [batch["path"][index]] * len(actual_functions) 
         dicty["features"] += [features[index]] * len(actual_functions)
+    print(f"Procssed {len(dicty['function'])} functions so far!")
     if len(dicty["function"]) > DESIRED_NUM_FUNCTIONS:
         break
 
@@ -113,5 +113,5 @@ ds = ds.add_column("detailed_description", [code2doc.get_gpt_doc(func, "detailed
 ds = ds.add_column("code_trans", code2doc.get_code_trans_docs(ds['function']))
 
 # Push to hugging face!
-DATASET_NAME = "annotated_github_dataset"
+DATASET_NAME = "annotated_github_dataset_2"
 ds.push_to_hub(DATASET_NAME)  
