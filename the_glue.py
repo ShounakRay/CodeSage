@@ -82,7 +82,7 @@ def simulate():
       IC_KVALS=[70, 120, 180]
       C2C_LLMS=['CODE-T5']
       C2C_TEST_SIZE=[0.3]
-      C2C_BATCH_SIZES=[16] 
+      C2C_BATCH_SIZES=[8] 
       C2C_WEIGHT_DECAYS=[0.01]
       C2C_EPOCH_NS=[1]
       C2C_LR=[0.01]
