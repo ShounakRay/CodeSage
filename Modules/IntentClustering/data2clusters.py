@@ -27,7 +27,7 @@ class IntentClustering():
       with open('clusters.json', 'w') as fp:
         json.dump(data, fp)
 
-   def _preprocess(self, embedder="STrans", load_numpys=True, save_numpys=False, model='Detailed'):
+   def _preprocess(self, embedder="strans", load_numpys=True, save_numpys=False, model='Detailed'):
       # We're skipping this part for local testing
       # with Pool(os.cpu_count() - 1) as pool:
       #    mapping = pool.starmap(MULT_preprocess, list(self.code_reference.items()))

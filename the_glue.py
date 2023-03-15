@@ -28,13 +28,11 @@ def run_end_to_end_with_parameters(
       C2C_WEIGHT_DECAY,
 ):
       assert C2D_LLM in  ('CODETRANS', 'CODEX', 'GPT')
-      assert 0 <= SC_BOUNDARY <= 100
       assert IC_METHOD in ("kmeans", "dbscan")
-      assert IC_EMBEDDER in ("tfidf", "STrans", "Elmo")
-      assert 1 <= IC_KVAL <= 20
+      assert IC_EMBEDDER in ("tfidf", "strans", "elmo")
       assert SC_METHOD in ('PERCENTILE', 'SHARED')
       assert SC_SCORING in ('QUADRATIC', 'LINEAR')
-      assert C2C_LLM in ('CODE-T5', 'SOMETHING_ELSE')
+      assert C2C_LLM in ('CODE-T5')
       assert 0.01 <= C2C_TEST_SIZE <= 0.99
       assert 2e-5 <= C2C_LR <= 0.01
       assert 1 <= C2C_EPOCH_N <= 5
@@ -42,7 +40,7 @@ def run_end_to_end_with_parameters(
       assert 0.01 <= C2C_WEIGHT_DECAY <= 0.1 
       dataset = load_dataset(FUNCTIONS_DATASET_URI, split="train")
       detailed_docs = np.array(dataset["detailed_description"])
-      NUM_FUCTIONS_TO_FINETUNE_UNDER = len(detailed_docs[detailed_docs != ""]) - 2000
+      NUM_FUCTIONS_TO_FINETUNE_UNDER = len(detailed_docs[detailed_docs != ""]) - 500
       C2C_MODEL_OUTPUT_DIR = str(NUM_FUCTIONS_TO_FINETUNE_UNDER) + "_" + C2C_MODEL_OUTPUT_DIR
       code_snippets = dataset.filter(lambda example: len(example["function"].split()) <= MAX_FUNCTION_STRING_LENGTH)[:NUM_FUCTIONS_TO_FINETUNE_UNDER]
       code2doc = Code2DocModule()
@@ -58,7 +56,10 @@ def run_end_to_end_with_parameters(
                                        SC_HIGHPERC=100-SC_LOWPERC if SC_METHOD == 'PERCENTILE' else None,
                                        SC_BOUNDARY=SC_BOUNDARY if SC_METHOD == 'SHARED' else None)
       scored_dataset = clusters2scoredDataset.get_scored_dataset()
-      scored_dataset.push_to_hub("bad_code_to_good_code_dataset_" + C2C_MODEL_OUTPUT_DIR);
+      try:
+            scored_dataset.push_to_hub("bad_code_to_good_code_dataset_" + C2C_MODEL_OUTPUT_DIR);
+      except Exception as e:
+            print(f"Pushing dataset failure due to {e}")
       model = T5Code2CodeModel("base")
       model.train(scored_dataset, 
             C2C_MODEL_OUTPUT_DIR, 
@@ -76,7 +77,7 @@ def simulate():
       SC_LOWPERCS=[15, 30, 45]
       SC_BOUNDARIES=[40, 50, 60]
       IC_METHODS=["kmeans", "dbscan"]
-      IC_EMBEDDERS=["STrans"]
+      IC_EMBEDDERS=["strans"]
       SC_SCORING=["LINEAR", "QUADRATIC"]
       IC_KVALS=[70, 120, 180]
       C2C_LLMS=['CODE-T5']
@@ -140,25 +141,29 @@ def simulate():
             #       "C2C_MODEL_OUTPUT_DIR = " + str(output_dir_name),
             #       sep="\n"
 
-            run_end_to_end_with_parameters(
-                  FUNCTIONS_DATASET_URI="michaelnath/annotated_github_dataset_2",
-                  MAX_FUNCTION_STRING_LENGTH=512,
-                  C2D_LLM = combination[0],
-                  SC_LOWPERC = combination[1] if combination[5] == "PERCENTILE" else None,
-                  SC_BOUNDARY = combination[1] if combination[5] == "SHARED" else None,
-                  IC_METHOD = combination[2],
-                  IC_EMBEDDER = combination[3],
-                  SC_SCORING = combination[4],
-                  SC_METHOD = combination[5],
-                  IC_KVAL = combination[6],
-                  C2C_LLM = combination[7],
-                  C2C_TEST_SIZE=combination[8],
-                  C2C_BATCH_SIZE=combination[9],
-                  C2C_WEIGHT_DECAY=combination[10],
-                  C2C_EPOCH_N=combination[11],
-                  C2C_LR=combination[12],
-                  C2C_MODEL_OUTPUT_DIR=output_dir_name
-            )
+            try:
+                  run_end_to_end_with_parameters(
+                        FUNCTIONS_DATASET_URI="michaelnath/annotated_github_dataset_2",
+                        MAX_FUNCTION_STRING_LENGTH=512,
+                        C2D_LLM = combination[0],
+                        SC_LOWPERC = combination[1] if combination[5] == "PERCENTILE" else None,
+                        SC_BOUNDARY = combination[1] if combination[5] == "SHARED" else None,
+                        IC_METHOD = combination[2],
+                        IC_EMBEDDER = combination[3],
+                        SC_SCORING = combination[4],
+                        SC_METHOD = combination[5],
+                        IC_KVAL = combination[6],
+                        C2C_LLM = combination[7],
+                        C2C_TEST_SIZE=combination[8],
+                        C2C_BATCH_SIZE=combination[9],
+                        C2C_WEIGHT_DECAY=combination[10],
+                        C2C_EPOCH_N=combination[11],
+                        C2C_LR=combination[12],
+                        C2C_MODEL_OUTPUT_DIR=output_dir_name
+                  )
+            except Exception as e:
+                  print(f"Main failure: {e}")
+                  
       
 if __name__ == "__main__":
       simulate()
