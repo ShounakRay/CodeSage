@@ -7,20 +7,20 @@ from Modules.IntentClustering.data2clusters import IntentClustering
 from Modules.ScoreClusters.clusters2score import ScoreClusters
 from Modules.Code2Code.models.t5_code_2_code_model import T5Code2CodeModel
 
-# ########################################################################
-# ######################### HYPERPARAMETERS ##############################
-# ########################################################################
+# # ########################################################################
+# # ######################### HYPERPARAMETERS ##############################
+# # ########################################################################
 
-# MAX_FUNCTION_STRING_LENGTH = 512
-# N_SNIPPETS = 10000
+# # MAX_FUNCTION_STRING_LENGTH = 512
+# # N_SNIPPETS = 10000
 
-# C2D_LLM = 'CODETRANS'
-# assert C2D_LLM in  ('CODETRANS', 'CODEX', 'GPT')
+# # C2D_LLM = 'CODETRANS'
+# # assert C2D_LLM in  ('CODETRANS', 'CODEX', 'GPT')
 
-# # IC_ALGO = 'KMEANS'
-# # assert IC_ALGO in ("KMEANS/SOM, KMEANS, DBSCSAN")
-# # IC_KVAL = 10
-# # assert type(IC_KVAL) == np.number
+# # # IC_ALGO = 'KMEANS'
+# # # assert IC_ALGO in ("KMEANS/SOM, KMEANS, DBSCSAN")
+# # # IC_KVAL = 10
+# # # assert type(IC_KVAL) == np.number
 
 # SC_LOWPERC = 0.1
 # assert 0.01 <= SC_LOWPERC <= 0.99
@@ -138,7 +138,7 @@ def run_end_to_end_with_parameters(
       C2C_BATCH_SIZE,
       C2C_WEIGHT_DECAY,
 ):
-      assert C2D_LLM in  ('C`ODETRANS', 'CODEX', 'GPT')
+      assert C2D_LLM in  ('CODETRANS', 'CODEX', 'GPT')
       assert 1 <= SC_LOWPERC <= 99
       assert 1 <= SC_HIGHPERC <= 99
       assert 0 <= SC_BOUNDARY <= 100
@@ -154,7 +154,7 @@ def run_end_to_end_with_parameters(
       assert 1 <= C2C_BATCH_SIZE <= 64
       assert 0.01 <= C2C_WEIGHT_DECAY <= 0.1 
       dataset = load_dataset(FUNCTIONS_DATASET_URI, split="train")
-      code_snippets = dataset.filter(lambda example: len(example["function"].split()) <= MAX_FUNCTION_STRING_LENGTH)[:500]
+      code_snippets = dataset.filter(lambda example: len(example["function"].split()) <= MAX_FUNCTION_STRING_LENGTH)[:100]
       code2doc = Code2DocModule()
       data_with_docs = code2doc.get_docs(code_snippets, C2D_LLM = C2D_LLM) 
       doc2clusters = IntentClustering(function_ids=data_with_docs['function_ids'], code_reference=data_with_docs['code_reference'])
@@ -164,10 +164,8 @@ def run_end_to_end_with_parameters(
                                        SC_LOWPERC=SC_LOWPERC if SC_METHOD == 'PERCENTILE' else None,
                                        SC_HIGHPERC=SC_HIGHPERC if SC_METHOD == 'PERCENTILE' else None,
                                        SC_BOUNDARY=SC_BOUNDARY if SC_METHOD == 'SHARED' else None)
-      
-      scored_dataset = clusters2scoredDataset.get_scored_dataset()
+      scored_datset = clusters2scoredDataset.get_scored_dataset()
       model = T5Code2CodeModel("base", C2C_EVAL_METRIC=C2C_EVAL_METRIC)
-      MODEL_OUTPUT_DIR = "C2C_Model_03_14_2023"
       model.train(scored_dataset, 
             MODEL_OUTPUT_DIR, 
             C2C_TEST_SIZE=C2C_TEST_SIZE, 
@@ -242,6 +240,5 @@ def simulate():
             C2C_WEIGHT_DECAY=0.01, 
       )
       
-
 if __name__ == "__main__":
       simulate()
