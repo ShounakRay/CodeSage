@@ -1,6 +1,6 @@
 from sklearn.cluster import KMeans, DBSCAN
 import numpy as np
-from vectorizer import vectorize
+from Modules.IntentClustering.vectorizer import vectorize
 import json
 import _pickle as cPickle
 import numpy as np
@@ -65,7 +65,7 @@ class IntentClustering():
       for index in range(len(self._labels)):
          cluster_id = self._labels[index]
          documentation_i = self.data[index]
-         data_app = self.doc_to_id[documentation_i]
+         data_app = str(self.doc_to_id[documentation_i])
          """
          Exmaple format of `doc_to_id.`
          {'Sends Geolocation data to falcon REST API': 'fd798e8f-157a-4214-9ddd-5cbfe607fa51'}
@@ -103,7 +103,7 @@ class IntentClustering():
       print("Clustering\tPre-processing...")
       self.data, self.v_data, self.doc_to_id = self._preprocess(embedder=embedder,
                                                                 save_numpys=False,
-                                                                load_numpys=True,
+                                                                load_numpys=False,
                                                                 model=doc_source)
       
       if method == 'kmeans':

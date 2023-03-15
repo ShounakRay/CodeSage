@@ -28,7 +28,6 @@ def run_end_to_end_with_parameters(
       C2C_WEIGHT_DECAY,
 ):
       assert C2D_LLM in  ('CODETRANS', 'CODEX', 'GPT')
-      assert 1 <= SC_LOWPERC <= 99
       assert 0 <= SC_BOUNDARY <= 100
       assert IC_METHOD in ("kmeans", "dbscan")
       assert IC_EMBEDDER in ("tfidf", "STrans", "Elmo")
