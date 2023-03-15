@@ -32,16 +32,14 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         
         inputs = [self.prefix + example for example in examples["input"]]
         outputs = [example for example in examples["target"]]
-        # max_cluster_amount = 50
-        # tokenized_input_references_pairs = {"input_ids": [], "labels": []}
-        # for i in range(len(inputs)):
-        #     references = outputs[i] + max(0, max_cluster_amount - len(outputs[i])) * ["BLEH"]
-        #     encodings_i = self.tokenizer(inputs[i], text_target=references, max_length=512, truncation=True)
-        #     tokenized_input_references_pairs["input_ids"].append(encodings_i["input_ids"])
-        #     tokenized_input_references_pairs["labels"].append(encodings_i["labels"])
-        # print(tokenized_input_references_pairs)
-        tokenized_input_references_pairs = self.tokenizer(inputs, text_target=outputs, max_length=self.max_length, truncation=True)
-        return tokenized_input_references_pairs
+        model_inputs = self.tokenizer(inputs, max_length=self.max_length, padding="max_length", truncation=True)
+        labels = self.tokenizer(outputs, max_length=self.max_length, padding="max_length", truncation=True).input_ids
+        labels_with_ignore_index = []
+        for labels_example in labels:
+            labels_example = [label if label != 0 else -100 for label in labels_example]
+            labels_with_ignore_index.append(labels_example)
+        model_inputs["labels"] = labels_with_ignore_index
+        return model_inputs
 
     def postprocess_text(self, preds, labels):
         preds = [pred.strip() for pred in preds]
@@ -56,6 +54,7 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         labels = np.where(labels != -100, labels, self.tokenizer.pad_token_id)
         decoded_labels = self.tokenizer.batch_decode(labels, skip_special_tokens=True)
         decoded_preds, decoded_labels = self.postprocess_text(decoded_preds, decoded_labels)
+        print(decoded_labels)
         result = self.metric.compute(predictions=decoded_preds, references=decoded_labels)
         result = {"chrf": result["score"]}
         prediction_lens = [np.count_nonzero(pred != self.tokenizer.pad_token_id) for pred in preds]

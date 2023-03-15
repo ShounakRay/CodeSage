@@ -130,6 +130,7 @@ def run_end_to_end_with_parameters(
       SC_HIGHPERC,
       SC_BOUNDARY,
       SC_METHOD,
+      C2C_MODEL_OUTPUT_DIR,
       C2C_LLM,
       C2C_EVAL_METRIC,
       C2C_TEST_SIZE,
@@ -154,7 +155,7 @@ def run_end_to_end_with_parameters(
       assert 1 <= C2C_BATCH_SIZE <= 64
       assert 0.01 <= C2C_WEIGHT_DECAY <= 0.1 
       dataset = load_dataset(FUNCTIONS_DATASET_URI, split="train")
-      code_snippets = dataset.filter(lambda example: len(example["function"].split()) <= MAX_FUNCTION_STRING_LENGTH)[:100]
+      code_snippets = dataset.filter(lambda example: len(example["function"].split()) <= MAX_FUNCTION_STRING_LENGTH)[:50]
       code2doc = Code2DocModule()
       data_with_docs = code2doc.get_docs(code_snippets, C2D_LLM = C2D_LLM) 
       doc2clusters = IntentClustering(function_ids=data_with_docs['function_ids'], code_reference=data_with_docs['code_reference'])
@@ -164,10 +165,10 @@ def run_end_to_end_with_parameters(
                                        SC_LOWPERC=SC_LOWPERC if SC_METHOD == 'PERCENTILE' else None,
                                        SC_HIGHPERC=SC_HIGHPERC if SC_METHOD == 'PERCENTILE' else None,
                                        SC_BOUNDARY=SC_BOUNDARY if SC_METHOD == 'SHARED' else None)
-      scored_datset = clusters2scoredDataset.get_scored_dataset()
+      scored_dataset = clusters2scoredDataset.get_scored_dataset()
       model = T5Code2CodeModel("base", C2C_EVAL_METRIC=C2C_EVAL_METRIC)
       model.train(scored_dataset, 
-            MODEL_OUTPUT_DIR, 
+            C2C_MODEL_OUTPUT_DIR, 
             C2C_TEST_SIZE=C2C_TEST_SIZE, 
             C2C_LR=C2C_LR, 
             C2C_BATCH_SIZE=C2C_BATCH_SIZE, 
@@ -231,6 +232,7 @@ def simulate():
             SC_HIGHPERC = 80,
             SC_BOUNDARY = 60,
             SC_METHOD = "SHARED",
+            C2C_MODEL_OUTPUT_DIR="testing_preprocess",
             C2C_LLM = "CODE-T5",
             C2C_EVAL_METRIC="chrf",
             C2C_TEST_SIZE=0.2,

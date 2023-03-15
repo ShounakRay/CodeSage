@@ -50,11 +50,11 @@ class IntentClustering():
       v_data = vectorize(data=data, embedder=embedder)
 
       if save_numpys:
-         with open('Modules/IntentClustering/storeData/data.pickle', 'wb') as fp:
+         with open('Modules/IntentClustering/storeData/data.pickle', 'w+b') as fp:
             cPickle.dump(data, fp) # , protocol=pickle.HIGHEST_PROTOCOL)
-         with open('Modules/IntentClustering/storeData/v_data.pickle', 'wb') as fp:
+         with open('Modules/IntentClustering/storeData/v_data.pickle', 'w+b') as fp:
             cPickle.dump(v_data, fp) # , protocol=pickle.HIGHEST_PROTOCOL)
-         with open('Modules/IntentClustering/storeData/doc_to_id.pickle', 'wb') as fp:
+         with open('Modules/IntentClustering/storeData/doc_to_id.pickle', 'w+b') as fp:
             cPickle.dump(doc_to_id, fp) # , protocol=cPickle.HIGHEST_PROTOCOL)
 
       return data, v_data, doc_to_id
