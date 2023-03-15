@@ -1,6 +1,6 @@
 from sklearn.cluster import KMeans, DBSCAN
 import numpy as np
-from Modules.IntentClustering.vectorizer import vectorize
+from vectorizer import vectorize
 import json
 import _pickle as cPickle
 import numpy as np
@@ -27,34 +27,35 @@ class IntentClustering():
       with open('clusters.json', 'w') as fp:
         json.dump(data, fp)
 
-   def _preprocess(self, embedder="STrans", load_numpys=True, save_numpys=False):
+   def _preprocess(self, embedder="STrans", load_numpys=True, save_numpys=False, model='Detailed'):
       # We're skipping this part for local testing
       # with Pool(os.cpu_count() - 1) as pool:
       #    mapping = pool.starmap(MULT_preprocess, list(self.code_reference.items()))
       # doc_to_id = dict(mapping)
 
       if load_numpys:
-         with open('Modules/IntentClustering/storeData/data.pickle', 'rb') as fp:
+         with open(f'Modules/IntentClustering/storeData/{model}/data-{model}.pickle', 'rb') as fp:
             data = cPickle.load(fp)
-         with open('Modules/IntentClustering/storeData/v_data.pickle', 'rb') as fp:
+         with open(f'Modules/IntentClustering/storeData/{model}/v_data-{model}.pickle', 'rb') as fp:
             v_data = cPickle.load(fp)
-         with open('Modules/IntentClustering/storeData/doc_to_id.pickle', 'rb') as fp:
+         with open(f'Modules/IntentClustering/storeData/{model}/doc_to_id-{model}.pickle', 'rb') as fp:
             doc_to_id = cPickle.load(fp)
+      else:
+         doc_to_id = {}
+         for code_id, info in self.code_reference.items():
+            documentation_i = info["documentation"]
+            doc_to_id[documentation_i] = code_id
 
-      doc_to_id = {}
-      for code_id, info in self.code_reference.items():
-         documentation_i = info["documentation"]
-         doc_to_id[documentation_i] = code_id
-
-      data = list(doc_to_id.keys())
-      v_data = vectorize(data=data, embedder=embedder)
+         data = list(doc_to_id.keys())
+         v_data = vectorize(data=data, embedder=embedder)
+         print("Did vectorization on size: ", len(data))
 
       if save_numpys:
-         with open('Modules/IntentClustering/storeData/data.pickle', 'w+b') as fp:
+         with open(f'Modules/IntentClustering/storeData/{model}/data-{model}.pickle', 'wb') as fp:
             cPickle.dump(data, fp) # , protocol=pickle.HIGHEST_PROTOCOL)
-         with open('Modules/IntentClustering/storeData/v_data.pickle', 'w+b') as fp:
+         with open(f'Modules/IntentClustering/storeData/{model}/v_data-{model}.pickle', 'wb') as fp:
             cPickle.dump(v_data, fp) # , protocol=pickle.HIGHEST_PROTOCOL)
-         with open('Modules/IntentClustering/storeData/doc_to_id.pickle', 'w+b') as fp:
+         with open(f'Modules/IntentClustering/storeData/{model}/doc_to_id-{model}.pickle', 'wb') as fp:
             cPickle.dump(doc_to_id, fp) # , protocol=cPickle.HIGHEST_PROTOCOL)
 
       return data, v_data, doc_to_id
@@ -80,14 +81,16 @@ class IntentClustering():
       return clusters
 
    def kmeans(self, n_clusters=10, n_jobs=-1):
-      kmeans = KMeans(n_clusters=n_clusters, random_state=41, n_init="auto").fit(self.v_data)
+      kmeans = KMeans(n_clusters=n_clusters, random_state=41, n_init=5).fit(self.v_data)
       self._labels = kmeans.labels_ = np.array(kmeans.labels_, dtype=int)
 
    def dbscan(self, eps=0.5, min_samples=5, n_jobs=-1):
       dbscan = DBSCAN(eps=eps, min_samples=min_samples, n_jobs=n_jobs).fit(self.v_data)
       self._labels = dbscan.labels_ = np.array(dbscan.labels_, dtype=int)
    
-   def core_get_clusters(self, embedder="strans", method='kmeans', n_clusters=10, eps=0.5, min_samples=5, n_jobs=-1):
+   def core_get_clusters(self, embedder="strans", method='kmeans',
+                         n_clusters=10, eps=0.5, min_samples=2, n_jobs=-1,
+                         doc_source='Detailed'):
       method, embedder = method.lower(), embedder.lower()
       
       assert embedder in ("tfidf", "strans", "elmo")
@@ -98,7 +101,10 @@ class IntentClustering():
       assert type(min_samples) == int
       
       print("Clustering\tPre-processing...")
-      self.data, self.v_data, self.doc_to_id = self._preprocess(embedder=embedder, save_numpys=True, load_numpys=False)
+      self.data, self.v_data, self.doc_to_id = self._preprocess(embedder=embedder,
+                                                                save_numpys=False,
+                                                                load_numpys=True,
+                                                                model=doc_source)
       
       if method == 'kmeans':
          print("Clustering\tRunning KMeans...")

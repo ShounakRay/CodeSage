@@ -49,7 +49,9 @@ def run_end_to_end_with_parameters(
       code2doc = Code2DocModule()
       data_with_docs = code2doc.get_docs(code_snippets, C2D_LLM = C2D_LLM) 
       doc2clusters = IntentClustering(function_ids=data_with_docs['function_ids'], code_reference=data_with_docs['code_reference'])
-      clusters = doc2clusters.core_get_clusters(embedder=IC_EMBEDDER, method=IC_METHOD, n_clusters=IC_KVAL, eps=0.5, min_samples=5, n_jobs=-1)
+      clusters = doc2clusters.core_get_clusters(embedder=IC_EMBEDDER, method=IC_METHOD, n_clusters=IC_KVAL,
+                                                eps=0.5, min_samples=5, n_jobs=-1,
+                                                doc_source='Detailed' if C2D_LLM == 'GPT' else 'CodeTrans')
       clusters2scoredDataset = ScoreClusters(clusters, data_with_docs['code_reference'],
                                        SC_SCORING=SC_SCORING,
                                        SC_METHOD=SC_METHOD,
