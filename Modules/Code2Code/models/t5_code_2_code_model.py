@@ -78,7 +78,8 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         C2C_EPOCH_N=2,
     ):
         print("C2C (Preprocessing): Creating Bad Code -> Good Code Dataset")
-        dataset = dataset.map(self.preprocess_function, batched=True).train_test_split(test_size=C2C_TEST_SIZE)
+        print(f"Number of mappings in dataset G: {len(dataset)}")
+        dataset = dataset.map(self.preprocess_function, batched=True, num_proc=2).train_test_split(test_size=C2C_TEST_SIZE)
         train_dataset = dataset["train"]
         eval_dataset = dataset["test"]
         data_collator = DataCollatorForSeq2Seq(tokenizer=self.tokenizer, model=self.pretrained_model)
@@ -90,8 +91,9 @@ class T5Code2CodeModel(BaseCode2CodeModel):
             per_device_train_batch_size=C2C_BATCH_SIZE,
             per_device_eval_batch_size=C2C_BATCH_SIZE,
             weight_decay=C2C_WEIGHT_DECAY,
-            save_total_limit=C2C_EPOCH_N + 1,
+            save_total_limit=2,
             num_train_epochs=C2C_EPOCH_N,
+            dataloader_num_workers=2,
             predict_with_generate=True,
             fp16=True,
             push_to_hub=False,

@@ -1,6 +1,6 @@
 import itertools 
 import numpy as np
-from datasets import load_dataset
+from datasets import load_dataset, Dataset
 from Modules.Code2Explanation.code2doc import Code2DocModule
 from Modules.Code2Code.Extracontent.code_snippet_dataset import CodeSnippetDataset
 from Modules.IntentClustering.data2clusters import IntentClustering
@@ -40,9 +40,10 @@ def run_end_to_end_with_parameters(
       assert 0.01 <= C2C_WEIGHT_DECAY <= 0.1 
       dataset = load_dataset(FUNCTIONS_DATASET_URI, split="train")
       detailed_docs = np.array(dataset["detailed_description"])
-      NUM_FUCTIONS_TO_FINETUNE_UNDER = len(detailed_docs[detailed_docs != ""]) - 500
-      C2C_MODEL_OUTPUT_DIR = str(NUM_FUCTIONS_TO_FINETUNE_UNDER) + "_" + C2C_MODEL_OUTPUT_DIR
-      code_snippets = dataset.filter(lambda example: len(example["function"].split()) <= MAX_FUNCTION_STRING_LENGTH)[:NUM_FUCTIONS_TO_FINETUNE_UNDER]
+      # NUM_FUNCTIONS_TO_FINETUNE_UNDER = len(detailed_docs[detailed_docs != ""]) - 500
+      NUM_FUNCTIONS_TO_FINETUNE_UNDER = 1000
+      C2C_MODEL_OUTPUT_DIR = str(NUM_FUNCTIONS_TO_FINETUNE_UNDER) + "_" + C2C_MODEL_OUTPUT_DIR
+      code_snippets = dataset.filter(lambda example: len(example["function"].split()) <= MAX_FUNCTION_STRING_LENGTH)[:NUM_FUNCTIONS_TO_FINETUNE_UNDER]
       code2doc = Code2DocModule()
       data_with_docs = code2doc.get_docs(code_snippets, C2D_LLM = C2D_LLM) 
       doc2clusters = IntentClustering(function_ids=data_with_docs['function_ids'], code_reference=data_with_docs['code_reference'])
@@ -55,7 +56,7 @@ def run_end_to_end_with_parameters(
                                        SC_LOWPERC=SC_LOWPERC if SC_METHOD == 'PERCENTILE' else None,
                                        SC_HIGHPERC=100-SC_LOWPERC if SC_METHOD == 'PERCENTILE' else None,
                                        SC_BOUNDARY=SC_BOUNDARY if SC_METHOD == 'SHARED' else None)
-      scored_dataset = clusters2scoredDataset.get_scored_dataset()
+      scored_dataset = Dataset.from_dict(clusters2scoredDataset.get_scored_dataset().shuffle(seed=420)[:1000])
       # try:
       #       scored_dataset.push_to_hub(C2C_MODEL_OUTPUT_DIR);
       # except Exception as e:
@@ -73,19 +74,23 @@ def run_end_to_end_with_parameters(
 
 
 def simulate():
-      C2D_LLMS=['GPT','CODETRANS']
-      SC_LOWPERCS=[15, 30, 45]
-      SC_BOUNDARIES=[40, 50, 60]
-      IC_METHODS=["kmeans", "dbscan"]
+      C2D_LLMS=['GPT']
+      # Two
+      SC_LOWPERCS=[10, 40]
+      SC_BOUNDARIES=[50]
+      IC_METHODS=["kmeans"]
       IC_EMBEDDERS=["strans"]
-      SC_SCORING=["LINEAR", "QUADRATIC"]
-      IC_KVALS=[70, 120, 180]
+      # Two
+      SC_SCORING=["QUADRATIC"]
+      # Three
+      IC_KVALS=[60, 120, 250]
       C2C_LLMS=['CODE-T5']
-      C2C_TEST_SIZE=[0.3]
+      C2C_TEST_SIZE=[0.2]
       C2C_BATCH_SIZES=[8] 
       C2C_WEIGHT_DECAYS=[0.01]
       C2C_EPOCH_NS=[1]
-      C2C_LR=[0.01]
+      # Two
+      C2C_LR=[0.01, 0.05]
 
       shared_combination = itertools.product(
             C2D_LLMS,
