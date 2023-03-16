@@ -74,19 +74,23 @@ def run_end_to_end_with_parameters(
 
 
 def simulate():
-      C2D_LLMS=['GPT','CODETRANS']
-      SC_LOWPERCS=[15, 30, 45]
-      SC_BOUNDARIES=[40, 50, 60]
-      IC_METHODS=["kmeans", "dbscan"]
+      C2D_LLMS=['GPT']
+      # Two
+      SC_LOWPERCS=[10, 40]
+      SC_BOUNDARIES=[50]
+      IC_METHODS=["kmeans"]
       IC_EMBEDDERS=["strans"]
-      SC_SCORING=["LINEAR", "QUADRATIC"]
-      IC_KVALS=[70, 120, 180]
+      # Two
+      SC_SCORING=["QUADRATIC"]
+      # Three
+      IC_KVALS=[60, 120, 250]
       C2C_LLMS=['CODE-T5']
-      C2C_TEST_SIZE=[0.3]
-      C2C_BATCH_SIZES=[18] 
+      C2C_TEST_SIZE=[0.2]
+      C2C_BATCH_SIZES=[8] 
       C2C_WEIGHT_DECAYS=[0.01]
       C2C_EPOCH_NS=[1]
-      C2C_LR=[0.01]
+      # Two
+      C2C_LR=[0.01, 0.05]
 
       shared_combination = itertools.product(
             C2D_LLMS,
