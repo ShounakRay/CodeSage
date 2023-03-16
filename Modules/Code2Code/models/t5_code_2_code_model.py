@@ -78,6 +78,7 @@ class T5Code2CodeModel(BaseCode2CodeModel):
         C2C_EPOCH_N=2,
     ):
         print("C2C (Preprocessing): Creating Bad Code -> Good Code Dataset")
+        print(f"Number of mappings in dataset G: {len(dataset)}")
         dataset = dataset.map(self.preprocess_function, batched=True, num_proc=2).train_test_split(test_size=C2C_TEST_SIZE)
         train_dataset = dataset["train"]
         eval_dataset = dataset["test"]

@@ -1,6 +1,6 @@
 import itertools 
 import numpy as np
-from datasets import load_dataset
+from datasets import load_dataset, Dataset
 from Modules.Code2Explanation.code2doc import Code2DocModule
 from Modules.Code2Code.Extracontent.code_snippet_dataset import CodeSnippetDataset
 from Modules.IntentClustering.data2clusters import IntentClustering
@@ -56,7 +56,7 @@ def run_end_to_end_with_parameters(
                                        SC_LOWPERC=SC_LOWPERC if SC_METHOD == 'PERCENTILE' else None,
                                        SC_HIGHPERC=100-SC_LOWPERC if SC_METHOD == 'PERCENTILE' else None,
                                        SC_BOUNDARY=SC_BOUNDARY if SC_METHOD == 'SHARED' else None)
-      scored_dataset = clusters2scoredDataset.get_scored_dataset()
+      scored_dataset = Dataset.from_dict(clusters2scoredDataset.get_scored_dataset().shuffle(seed=420)[:1000])
       # try:
       #       scored_dataset.push_to_hub(C2C_MODEL_OUTPUT_DIR);
       # except Exception as e:
