@@ -40,9 +40,10 @@ def run_end_to_end_with_parameters(
       assert 0.01 <= C2C_WEIGHT_DECAY <= 0.1 
       dataset = load_dataset(FUNCTIONS_DATASET_URI, split="train")
       detailed_docs = np.array(dataset["detailed_description"])
-      NUM_FUCTIONS_TO_FINETUNE_UNDER = len(detailed_docs[detailed_docs != ""]) - 500
-      C2C_MODEL_OUTPUT_DIR = str(NUM_FUCTIONS_TO_FINETUNE_UNDER) + "_" + C2C_MODEL_OUTPUT_DIR
-      code_snippets = dataset.filter(lambda example: len(example["function"].split()) <= MAX_FUNCTION_STRING_LENGTH)[:NUM_FUCTIONS_TO_FINETUNE_UNDER]
+      # NUM_FUNCTIONS_TO_FINETUNE_UNDER = len(detailed_docs[detailed_docs != ""]) - 500
+      NUM_FUNCTIONS_TO_FINETUNE_UNDER = 1000
+      C2C_MODEL_OUTPUT_DIR = str(NUM_FUNCTIONS_TO_FINETUNE_UNDER) + "_" + C2C_MODEL_OUTPUT_DIR
+      code_snippets = dataset.filter(lambda example: len(example["function"].split()) <= MAX_FUNCTION_STRING_LENGTH)[:NUM_FUNCTIONS_TO_FINETUNE_UNDER]
       code2doc = Code2DocModule()
       data_with_docs = code2doc.get_docs(code_snippets, C2D_LLM = C2D_LLM) 
       doc2clusters = IntentClustering(function_ids=data_with_docs['function_ids'], code_reference=data_with_docs['code_reference'])
@@ -82,7 +83,7 @@ def simulate():
       IC_KVALS=[70, 120, 180]
       C2C_LLMS=['CODE-T5']
       C2C_TEST_SIZE=[0.3]
-      C2C_BATCH_SIZES=[8] 
+      C2C_BATCH_SIZES=[18] 
       C2C_WEIGHT_DECAYS=[0.01]
       C2C_EPOCH_NS=[1]
       C2C_LR=[0.01]
