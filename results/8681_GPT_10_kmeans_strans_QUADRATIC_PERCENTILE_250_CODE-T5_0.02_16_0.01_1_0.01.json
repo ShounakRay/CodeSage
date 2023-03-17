@@ -1,0 +1,17 @@
+{
+  "eval_loss": NaN,
+  "eval_chrf": 0.0,
+  "eval_codebleu": {
+    "CodeBLEU": 0.25,
+    "ngram_match_score": 0,
+    "weighted_ngram_match_score": 0,
+    "syntax_match_score": 0.0,
+    "dataflow_match_score": 0.0
+  },
+  "eval_bleu": 0.0,
+  "eval_gen_len": 0.0,
+  "eval_runtime": 222.8594,
+  "eval_samples_per_second": 8.974,
+  "eval_steps_per_second": 0.561,
+  "epoch": 1.0
+}

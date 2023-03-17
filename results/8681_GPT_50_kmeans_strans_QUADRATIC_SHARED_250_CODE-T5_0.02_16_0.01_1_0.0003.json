@@ -1,0 +1,17 @@
+{
+  "eval_loss": 0.4971793293952942,
+  "eval_chrf": 5.128209333540998,
+  "eval_codebleu": {
+    "CodeBLEU": 0.048737980112022294,
+    "ngram_match_score": 6.029399770287681e-09,
+    "weighted_ngram_match_score": 3.889087396002079e-05,
+    "syntax_match_score": 0.11973464516635103,
+    "dataflow_match_score": 0.07517837837837837
+  },
+  "eval_bleu": 0.05137899633328029,
+  "eval_gen_len": 19.0,
+  "eval_runtime": 37.7699,
+  "eval_samples_per_second": 52.952,
+  "eval_steps_per_second": 3.31,
+  "epoch": 1.0
+}
