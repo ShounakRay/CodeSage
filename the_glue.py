@@ -33,15 +33,12 @@ def run_end_to_end_with_parameters(
       assert SC_METHOD in ('PERCENTILE', 'SHARED')
       assert SC_SCORING in ('QUADRATIC', 'LINEAR')
       assert C2C_LLM in ('CODE-T5')
-      assert 0.01 <= C2C_TEST_SIZE <= 0.99
-      assert 2e-5 <= C2C_LR <= 0.01
       assert 1 <= C2C_EPOCH_N <= 5
       assert 1 <= C2C_BATCH_SIZE <= 64
       assert 0.01 <= C2C_WEIGHT_DECAY <= 0.1 
       dataset = load_dataset(FUNCTIONS_DATASET_URI, split="train")
       detailed_docs = np.array(dataset["detailed_description"])
-      # NUM_FUNCTIONS_TO_FINETUNE_UNDER = len(detailed_docs[detailed_docs != ""]) - 500
-      NUM_FUNCTIONS_TO_FINETUNE_UNDER = 1000
+      NUM_FUNCTIONS_TO_FINETUNE_UNDER = len(detailed_docs[detailed_docs != ""]) - 500
       C2C_MODEL_OUTPUT_DIR = str(NUM_FUNCTIONS_TO_FINETUNE_UNDER) + "_" + C2C_MODEL_OUTPUT_DIR
       code_snippets = dataset.filter(lambda example: len(example["function"].split()) <= MAX_FUNCTION_STRING_LENGTH)[:NUM_FUNCTIONS_TO_FINETUNE_UNDER]
       code2doc = Code2DocModule()
@@ -56,12 +53,12 @@ def run_end_to_end_with_parameters(
                                        SC_LOWPERC=SC_LOWPERC if SC_METHOD == 'PERCENTILE' else None,
                                        SC_HIGHPERC=100-SC_LOWPERC if SC_METHOD == 'PERCENTILE' else None,
                                        SC_BOUNDARY=SC_BOUNDARY if SC_METHOD == 'SHARED' else None)
-      scored_dataset = Dataset.from_dict(clusters2scoredDataset.get_scored_dataset().shuffle(seed=420)[:1000])
+      scored_dataset = Dataset.from_dict(clusters2scoredDataset.get_scored_dataset().shuffle(seed=420)[:100_000])
       # try:
       #       scored_dataset.push_to_hub(C2C_MODEL_OUTPUT_DIR);
       # except Exception as e:
       #       print(f"Pushing dataset failure due to {e}")
-      model = T5Code2CodeModel("base")
+      model = T5Code2CodeModel("small")
       model.train(scored_dataset, 
             C2C_MODEL_OUTPUT_DIR, 
             C2C_TEST_SIZE=C2C_TEST_SIZE, 
@@ -74,23 +71,23 @@ def run_end_to_end_with_parameters(
 
 
 def simulate():
-      C2D_LLMS=['GPT']
+      C2D_LLMS=['CODETRANS']
       # Two
       SC_LOWPERCS=[10, 40]
       SC_BOUNDARIES=[50]
-      IC_METHODS=["kmeans"]
+      IC_METHODS=["dbscan"]
       IC_EMBEDDERS=["strans"]
       # Two
       SC_SCORING=["QUADRATIC"]
       # Three
-      IC_KVALS=[60, 120, 250]
+      IC_KVALS=[30, 50, 180]
       C2C_LLMS=['CODE-T5']
-      C2C_TEST_SIZE=[0.2]
-      C2C_BATCH_SIZES=[8] 
+      C2C_TEST_SIZE=[0.02]
+      C2C_BATCH_SIZES=[16] 
       C2C_WEIGHT_DECAYS=[0.01]
       C2C_EPOCH_NS=[1]
       # Two
-      C2C_LR=[0.01, 0.05]
+      C2C_LR=[3e-4, 1e-4]
 
       shared_combination = itertools.product(
             C2D_LLMS,
