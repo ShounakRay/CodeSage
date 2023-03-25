@@ -151,3 +151,6 @@ dmypy.json
 .pyre/
 Modules/.DS_Store
 Modules/IntentClustering/Reference/
+*.pickle
+*.pickle
+*.pickle

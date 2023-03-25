@@ -33,6 +33,7 @@ import _pickle as cPickle
 9. [Compare]    Qualitatively see if the KMeans clustering on the "Reference" dataset splits into similar categories as the
                     "True Dataset"
 """
+
 if __name__ == "__main__":
     # mapping = {intent_category : detailed_description}
     RAW_OUTPUT = load_dataset("michaelnath/annotated_github_dataset_2")
@@ -41,7 +42,9 @@ if __name__ == "__main__":
     # NUM_TRUE_CLUSTERS = RAW_OUTPUT['repo_name'].nunique()
     NUM_TRUE_CLUSTERS = 50
 
-    DOC_MODES = [['purpose', 'code_trans', 'detailed_description'][2]]
+
+    # DOC_MODES = ['purpose', 'code_trans', 'detailed_description']
+    DOC_MODES = ['detailed_description']
     REF_id_to_cats = dict(zip(RAW_OUTPUT['index'], RAW_OUTPUT['repo_name']))
 
     with open(f"Modules/IntentClustering/storeData/REF_id_to_cats.json", 'w') as fp:
@@ -59,24 +62,26 @@ if __name__ == "__main__":
             REF_id_to_docs[code_id] = {"documentation": documentation}
 
         # silhouette_scores[DOC_M] = {}
-        for K_VALUE in np.arange(30, 500, 30):
-            K_VALUE = int(K_VALUE)
-            print(f"DOC_MODE: {DOC_M}, Clustering with k-value {K_VALUE}")
+        for EPS_VALUE in np.arange(0.4, 0.95, 0.05):
+            # K_VALUE = int(K_VALUE)
+            print(f"DOC_MODE: {DOC_M}, Clustering with EPS {EPS_VALUE}")
             doc2clusters = IntentClustering(function_ids=REF_id_to_docs.keys(),
                                             code_reference=REF_id_to_docs)
-            clusters = doc2clusters.core_get_clusters(embedder='strans', method='kmeans',
-                                                    n_clusters=K_VALUE, eps=0.5,
+            clusters = doc2clusters.core_get_clusters(embedder='strans', method='dbscan',
+                                                    n_clusters=5, eps=EPS_VALUE,
                                                     min_samples=5, n_jobs=-1,
                                                     doc_source='Detailed')
             sil_score = silhouette_score(doc2clusters.v_data, doc2clusters._labels, metric = 'euclidean')
 
             # LIMIATION: only working on good data
+            SILHOUETTE_SCORES.append((DOC_M, EPS_VALUE, sil_score))
             # TODO: Test on different types of documentation
             # reference = {}
-            for cluster_id, list_doc_ids in clusters.items():
-                true_folder_freqs = dict(Counter([REF_id_to_cats[DET_id] for DET_id in list_doc_ids]))
-                # reference[cluster_id] = true_folder_freqs
-                SILHOUETTE_SCORES.append((DOC_M, K_VALUE, sil_score, cluster_id, list_doc_ids, true_folder_freqs))
+            # print(list(REF_id_to_cats.items())[:10])
+            # for cluster_id, list_doc_ids in clusters.items():
+            #     # true_folder_freqs = dict(Counter([REF_id_to_cats[DET_id] for DET_id in list_doc_ids]))
+            #     # reference[cluster_id] = true_folder_freqs
+            #     SILHOUETTE_SCORES.append((DOC_M, K_VALUE, sil_score, cluster_id, list_doc_ids)) # , true_folder_freqs))
 
             # silhouette_scores[K_VALUE] = {'sil_score': sil_score, 'c_dists': reference}
 
@@ -84,8 +89,7 @@ if __name__ == "__main__":
     #     json.dumps(silhouette_scores, fp)
 
     df = pd.DataFrame(SILHOUETTE_SCORES)
-    df.columns = ['C2D_Method', 'k_value', "silhouette", "algo_cluster_id",
-                "list_ids_cluster_id", "true_folder_freqs"]
-    df.to_pickle(f"Modules/IntentClustering/storeData/reference_GPT_performance__{DOC_MODES[0]}.pickle")
+    df.columns = ['C2D_Method', 'eps_value', "silhouette"]
+    df.to_pickle(f"Modules/IntentClustering/storeData/EPS_reference_GPT_performance__{DOC_MODES[0]}.pickle")
 
 # EOF

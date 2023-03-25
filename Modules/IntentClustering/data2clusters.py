@@ -1,6 +1,7 @@
 from sklearn.cluster import KMeans, DBSCAN
 import numpy as np
-from Modules.IntentClustering.vectorizer import vectorize
+from vectorizer import vectorize
+# from Modules.IntentClustering.vectorizer import vectorize
 import json
 import _pickle as cPickle
 import numpy as np
@@ -81,7 +82,7 @@ class IntentClustering():
       return clusters
 
    def kmeans(self, n_clusters=10, n_jobs=-1):
-      kmeans = KMeans(n_clusters=n_clusters, random_state=41, n_init=5).fit(self.v_data)
+      kmeans = KMeans(n_clusters=n_clusters, random_state=41, n_init=1).fit(self.v_data)
       self._labels = kmeans.labels_ = np.array(kmeans.labels_, dtype=int)
 
    def dbscan(self, eps=0.5, min_samples=5, n_jobs=-1):
@@ -103,7 +104,7 @@ class IntentClustering():
       print("Clustering\tPre-processing...")
       self.data, self.v_data, self.doc_to_id = self._preprocess(embedder=embedder,
                                                                 save_numpys=False,
-                                                                load_numpys=False,
+                                                                load_numpys=True,
                                                                 model=doc_source)
       
       if method == 'kmeans':
